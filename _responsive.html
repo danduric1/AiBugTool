@@ -1,0 +1,21 @@
+<style>
+    /* --- RESPONSIVE ADJUSTMENTS (Dark Mode Only) --- */
+    @media (max-width: 900px) { /* Tablet */
+      .container { gap: 1rem; }
+      .panels-wrapper { flex-direction: column; gap: 1.5rem; }
+      .left-panel, .right-panel { min-width: 100%; padding: 1rem; }
+      .header { font-size: 1.8rem; padding-right: 50px; }
+      #darkModeToggle { top: 1rem; right: 1rem; }
+      .condensed-row > .mdl-textfield { flex: 1 1 calc(50% - 0.5rem); }
+      .left-panel > .mdl-textfield:first-child { width: 100%; }
+    }
+    @media (max-width: 600px) { /* Mobile */
+        .header { font-size: 1.5rem; }
+        .left-panel, .right-panel { padding: 1rem; }
+        .button-group { flex-direction: column; gap: 0.75rem; }
+        .mdl-button { width: 100%; }
+        #status { text-align: center; }
+        #darkModeToggle { top: 0.75rem; right: 0.75rem; }
+        .condensed-row > .mdl-textfield { flex-basis: 100%; min-width: 100%;}
+    }
+</style>

@@ -1,0 +1,138 @@
+<style>
+    /* --- BASE & LAYOUT (Dark Mode Only) --- */
+    html {
+      font-size: 16px;
+    }
+    body {
+      font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color); /* Now uses consolidated dark mode background */
+      color: var(--text-color);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      box-sizing: border-box;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    header{
+      position: relative;
+    }
+    .container {
+      background-color: transparent;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 100vw;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      box-sizing: border-box;
+      position: relative;
+    }
+    .header {
+      color: var(--primary-color);
+      text-align: left;
+      margin-bottom: 0;
+      font-size: 2.25rem;
+      font-weight: 400;
+    }
+
+    .header-right-info {
+        position: absolute; /* Position relative to the header */
+        top: 0;
+        right: 16px; /* Adjust as needed for spacing from right edge */
+        height: 100%; /* Take full height of header to align vertically */
+        display: flex;
+        align-items: center;
+        gap: 16px; /* Space between logger and profile image */
+        padding-right: 8px; /* Inner padding */
+        z-index: 1000; /* Ensure it's above other elements if necessary */
+    }
+
+    .token-logger {
+        background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+        color: white;
+        padding: 6px 10px;
+        border-radius: 8px; /* Slightly rounded */
+        font-size: 0.8em; /* Smaller font */
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    .user-profile .profile-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%; /* Circular image */
+        border: 2px solid rgba(255, 255, 255, 0.4); /* Subtle white border */
+        object-fit: cover; /* Ensure image covers the area */
+    }
+
+    /* Responsive adjustments for smaller screens */
+    @media (max-width: 840px) {
+        .header-right-info {
+            right: 8px;
+            gap: 8px;
+        }
+        .token-logger {
+            font-size: 0.7em;
+            padding: 4px 8px;
+        }
+        .user-profile .profile-avatar {
+            width: 32px;
+            height: 32px;
+        }
+    }
+    
+    .selected-bug-title-container {
+        display: flex; /* Use flexbox for alignment */
+        align-items: center; /* Vertically align items */
+        gap: 8px; /* Space between icon and text */
+    }
+
+    .selected-bug-title-container .status-icon {
+        font-size: 24px; /* Adjust icon size */
+        color: #4285F4; /* Example color, match your theme */
+    }
+
+    .bug-title-link {
+        text-decoration: none; /* Remove underline */
+        color: inherit; /* Inherit color from parent */
+        font-weight: bold; /* Make title stand out */
+    }
+
+    .bug-title-link:hover {
+        text-decoration: underline; /* Add underline on hover */
+    }
+
+        /* Style for the container of the title and icon */
+    #selectedChildBugTitle { /* Use the actual ID of your title display element */
+        display: flex; /* Enables flexbox layout */
+        align-items: center; /* Vertically centers items along the cross-axis */
+        gap: 8px; /* Adds space between the icon and the link */
+        font-size: 1.2em; /* Example: make title slightly larger */
+        font-weight: bold;
+        color: #fff; /* Assuming dark mode, adjust as needed */
+        flex-direction: column;
+    }
+    
+    /* Styles for the icon */
+    #selectedChildBugTitle .status-icon {
+        font-size: 24px; /* Ensure icon is a reasonable size */
+        color: #4285F4; /* Example color, match your theme or use a relevant status color */
+        /* You might need to adjust line-height if the icon seems off */
+        line-height: 1; /* Helps with vertical alignment of icon within flex container */
+    }
+    
+    /* Styles for the clickable bug title link */
+    #selectedChildBugTitle .bug-title-link {
+        text-decoration: none; /* Remove default underline */
+        color: inherit; /* Inherit color from the parent (selectedChildBugTitle) */
+        /* If you want a specific color for the link, override 'inherit' here */
+    }
+    
+    #selectedChildBugTitle .bug-title-link:hover {
+        text-decoration: underline; /* Add underline on hover for user feedback */
+    }
+</style>

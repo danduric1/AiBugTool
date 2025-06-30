@@ -1,0 +1,56 @@
+<style>
+    /* --- PANELS (Dark Mode Only) --- */
+    .panels-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px; /* Limits the wrapper's width */
+      margin: 20px auto; /* Centers the wrapper itself */
+      padding: 0 1rem;
+    }
+
+    .mdl-layout__content {
+        padding: 0;
+    }
+
+    .mdl-layout__tab-panel {
+        padding: 0;
+    }
+
+    .left-panel, .right-panel {
+      flex: 1;
+      min-width: 320px;
+      padding: 1.5rem;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      border-radius: 15px; /* More rounded for Glassmorphism */
+      background-color: var(--background-panel); /* Transparent background */
+      border: 1px solid rgba(var(--background-panel-rgb), 0.2); /* Subtle transparent border */
+      box-shadow: var(--shadow-1);
+      backdrop-filter: blur(10px); /* Glassmorphism blur effect */
+      -webkit-backdrop-filter: blur(10px); /* Safari support */
+      transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease;
+      max-height: calc(100vh - 96px);
+      overflow: scroll;
+    }
+    .left-panel:hover, .right-panel:hover {
+        box-shadow: var(--shadow-2);
+        border-color: rgba(var(--primary-color-rgb), 0.3); /* Border highlights on hover */
+    }
+    .right-panel h3 {
+      color: var(--primary-color);
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      transition: border-bottom-color 0.3s ease;
+    }
+
+</style>

@@ -1,0 +1,86 @@
+<div class="panels-wrapper">
+    <div class="left-panel mdl-shadow--2dp glass-panel">
+        <div class="section-container" id="masterBugInputSection">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                <input class="mdl-textfield__input" type="text" id="masterBugIdInput" name="masterBugIdInput">
+                <label class="mdl-textfield__label" for="masterBugIdInput">Enter Master Bug ID</label>
+                <button id="fetchChildBugsBtn" class="mdl-button mdl-js-button mdl-button--icon mdl-textfield__button">
+                    <i class="material-icons">search</i>
+                </button>
+            </div>
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                <input class="mdl-textfield__input" type="url" id="googleSheetLinkInput" name="googleSheetLinkInput" placeholder=" " pattern="https://docs\.google\.com/spreadsheets/d/.+">
+                <label class="mdl-textfield__label" for="googleSheetLinkInput">Google Sheet Link for Test Plan</label>
+                <span class="mdl-textfield__error">Please enter a valid Google Sheet URL.</span>
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <textarea class="mdl-textfield__input" id="bugVerificationDeviceDetails" name="bugVerificationDeviceDetails" rows="8"></textarea>
+                <label class="mdl-textfield__label" for="bugVerificationDeviceDetails">Device Details</label>
+            </div>
+        </div>
+        <!-- Added style="position: relative;" here for the spinner to be contained -->
+        <div class="section-container" id="childBugListSection" style="position: relative;">
+            <ul class="mdl-list child-bug-list" id="childBugList">
+                <li class="mdl-list__item mdl-list__item--two-line dummy-child-bug" data-bug-id="101" data-bug-title="Dummy Child Bug 1: App Crash on Launch" data-bug-details="Detailed steps to reproduce dummy child bug 1. Expected behavior: No crash. Observed: App crashes immediately on launch.">
+                    <span class="mdl-list__item-primary-content">
+                        <span>Dummy Child Bug 1</span>
+                        <span class="mdl-list__item-sub-title">ID: 101</span>
+                    </span>
+                </li>
+                <li class="mdl-list__item mdl-list__item--two-line dummy-child-bug" data-bug-id="102" data-bug-title="Dummy Child Bug 2: UI Glitch on Rotation" data-bug-details="Detailed steps to reproduce dummy child bug 2. Expected behavior: UI adapts smoothly. Observed: UI elements overlap and distort on device rotation.">
+                    <span class="mdl-list__item-primary-content">
+                        <span>Dummy Child Bug 2</span>
+                        <span class="mdl-list__item-sub-title">ID: 102</span>
+                    </span>
+                </li>
+            </ul>
+            <div id="childBugListStatus" class="mdl-typography--caption">Enter a Master Bug ID to fetch child bugs.</div>
+        </div>
+
+    </div>
+
+    <div class="right-panel mdl-shadow--2dp glass-panel">
+        <div class="scrollable-content">
+            <div class="section-container">
+                <h4 id="selectedChildBugTitle">Click a child bug to view details</h4>
+
+                <hr class="section-divider">
+
+                <h5>AI Summary</h5>
+                <div id="aiSummaryDisplay" id="aiSummarySection">
+                    AI-generated summary will appear here.
+                </div>
+            </div>
+
+            <div class="section-container">
+                <details class="mdl-card__supporting-text" style="width: 100%; padding: 0;">
+                    <summary>Bug Description & Details</summary>
+                    <div id="bugContentsAccordionBody">
+                        Detailed bug description will appear here when a bug is selected.
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="fixed-bottom-section">
+            <h5>Additional Verification</h5>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                <textarea class="mdl-textfield__input" id="additionalVerificationData" name="additionalVerificationData" rows="4"></textarea>
+                <label class="mdl-textfield__label" for="additionalVerificationData">User Comments / Additional Data</label>
+            </div>
+
+            <div class="button-group" id="verificationSection">
+                <button id="reproducibleBtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--success mdl-js-ripple-effect" disabled>
+                    <i class="material-icons">check_circle</i> Reproducible
+                </button>
+                <button id="notReproducibleBtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" disabled>
+                    <i class="material-icons">cancel</i> Not Reproducible
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
