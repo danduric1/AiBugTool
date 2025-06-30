@@ -1,522 +1,702 @@
 <style>
-    body {
-        font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
-        background-color: var(--background-color); /* Use consolidated variable */
-        color: var(--text-color); /* Use consolidated variable */
-        margin: 0;
+
+      .output-textarea {
+        flex-grow: 1;
+        font-family: "Poppins", "Roboto Mono", monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
         box-sizing: border-box;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start; /* Align to top */
-        min-height: 100vh;
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
+        resize: vertical;
+        min-height: 450px;
+        background-color: rgba(30, 41, 59, 0.8);
+        color: white;
+        transition: all 0.3s ease;
+      }
 
-    /* Layout adjustments for panels-wrapper */
-    .panels-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Two equal columns */
-        gap: 20px; /* Space between columns */
-        width: 100%;
-        max-width: 1200px; /* Max width for the entire layout */
-        margin: 20px auto; /* Center the layout */
-    }
-
-    .left-panel,
-    .right-panel {
-        background-color: rgba(30, 30, 30, 0.6); /* Slightly transparent surface color */
-        backdrop-filter: blur(10px) saturate(180%); /* Glassmorphism effect */
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        padding: 25px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        min-height: 700px; /* Ensure panels have a minimum height */
-    }
-
-    .right-panel {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .scrollable-content {
-        flex-grow: 1; /* Allows this section to expand and take available space */
-        overflow-y: auto; /* Enables scrolling for this section */
-        padding-right: 10px; /* Space for scrollbar */
-        box-sizing: border-box;
-    }
-
-    .fixed-bottom-section {
-        flex-shrink: 0; /* Prevents this section from shrinking */
-        padding-top: 15px; /* Space above the section */
-        border-top: 1px solid var(--border-color); /* Separator line */
-        margin-top: 15px; /* Space above the separator */
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-        color: var(--primary-color);
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-weight: 500;
-    }
-
-    .mdl-textfield {
-        width: 100%;
-        position: relative;
-    }
-
-    .mdl-textfield__input {
-        color: var(--text-color);
-        border: none;
-        border-bottom: 1px solid var(--text-secondary-color);
-        background-color: var(--input-bg-color); /* Use consolidated variable */
-        transition: background-color 0.3s ease, color 0.3s ease, border-bottom-color 0.3s ease;
-        display: block;
-        box-sizing: border-box;
-        padding: 4px 0;
-        font-size: 0.95rem; /* Slightly smaller font for inputs */
-    }
-
-    .mdl-textfield:has(.mdl-textfield__button) .mdl-textfield__input {
-        width: calc(100% - 48px);
-        padding-right: 4px;
-    }
-
-    .mdl-textfield__button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        right: 0;
-        padding: 0 8px;
-        color: var(--text-secondary-color); /* Icon color */
-        transition: color 0.3s ease;
-    }
-
-    .mdl-textfield__button:hover {
-        color: var(--primary-color); /* Hover effect */
-    }
-
-    .mdl-textfield__label {
-        color: var(--text-secondary-color);
-        transition: color 0.3s ease, top 0.3s ease, font-size 0.3s ease;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: calc(100% - 10px);
-        font-size: 0.9em; /* Smaller label font */
-    }
-
-    .mdl-textfield--floating-label .mdl-textfield__label {
-        top: 20px; /* Default top position for label when input is empty/unfocused */
-    }
-    .mdl-textfield--floating-label.is-focused .mdl-textfield__label,
-    .mdl-textfield--floating-label.is-dirty .mdl-textfield__label {
-        color: var(--primary-color) !important; /* Color when active/dirty */
-        top: 4px; /* Shifted up position */
-        font-size: 0.7em; /* Smaller font when active/dirty */
-    }
-
-    .mdl-textfield__input:focus {
+      .output-textarea:focus {
+        border-color: var(--primary-light);
+        background-color: rgba(255, 255, 255, 0.07);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2),
+          inset 0 2px 4px rgba(0, 0, 0, 0.1);
         outline: none;
-        border-bottom-color: var(--primary-color);
-    }
+      }
 
-    .mdl-list__item {
-        width: 100%;
-        color: var(--text-color);
-        border-bottom: 1px solid var(--border-color);
-        background-color: rgba(255, 255, 255, 0.05); /* Subtle background for list items */
-        margin-bottom: 8px;
-        border-radius: 8px;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        cursor: pointer;
-        align-items: center; /* Vertically align content */
-    }
+      /* Glassmorphic typing cursor effect */
+      .output-textarea.typing {
+        position: relative;
+      }
 
-    .mdl-list__item:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        transform: translateY(-2px); /* Slight lift on hover */
-    }
+      .output-textarea.typing::after {
+        content: "|";
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        color: var(--primary-light);
+        font-weight: bold;
+        animation: blink 0.8s infinite;
+        text-shadow: var(--neon-primary);
+        opacity: 0.8;
+      }
 
-    .mdl-list__item.is-active {
-        background-color: rgba(var(--primary-color-rgb), 0.2); /* Primary color with transparency */
-        border: 1px solid var(--primary-color);
-    }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 0.2;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+      #deviceDetails {
+        font-family: "Roboto Mono", monospace;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        min-height: 150px;
+        color: white;
+      }
 
-    .mdl-list__item-primary-content {
+      /* --- LOADING & STATUS --- */
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(15, 23, 42, 0.7);
         display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .mdl-list__item-icon {
-        color: var(--secondary-color); /* Icon color in list */
-    }
-
-    .mdl-list__item-sub-title {
-        color: var(--text-secondary-color);
-        font-size: 0.8em;
-    }
-
-    .child-bug-list {
-        padding: 0;
-        border-color: rgba(255, 255, 255, 0.1); /* From _dark_mode.html */
-        background-color: rgba(0, 0, 0, 0.1); /* From _dark_mode.html */
-    }
-
-    .child-bug-item:hover {
-        background-color: rgba(var(--accent-color-rgb), 0.2); /* From _dark_mode.html */
-    }
-    .child-bug-item.is-active {
-        background-color: rgba(var(--primary-color-rgb), 0.3); /* From _dark_mode.html */
-    }
-
-    .section-divider {
-        border: none;
-        border-top: 1px dashed var(--border-color);
-        margin: 20px 0;
-    }
-
-    .section-container {
-        background-color: rgba(255, 255, 255, 0.03); /* Very subtle layer for sections */
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.08); /* Light border */
-    }
-
-    /* AI Summary specific styling */
-    #aiSummaryDisplay {
-        background-color: rgba(var(--primary-color-rgb), 0.1); /* Primary color with transparency */
-        border-left: 3px solid var(--primary-color);
-        padding: 15px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-        color: var(--text-color);
-        font-style: italic;
-        font-size: 0.9em;
-    }
-
-    /* Bug Description & Details Accordion Styling */
-    details {
-        background-color: rgba(255, 255, 255, 0.05); /* Subtle background for accordion */
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        margin-bottom: 20px;
-        overflow: hidden; /* Ensures rounded corners */
-        padding: 0;
-    }
-
-    summary {
-        padding: 15px;
-        cursor: pointer;
-        color: var(--primary-color);
-        font-weight: 500;
-        background-color: rgba(30, 30, 30, 0.7); /* Slightly darker for summary header */
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-    }
-
-    summary::marker {
-        content: ''; /* Hide default marker */
-    }
-
-    summary::-webkit-details-marker {
-        display: none; /* Hide default marker for Webkit */
-    }
-
-    summary::before {
-        content: '▶'; /* Custom arrow icon */
-        display: inline-block;
-        margin-right: 10px;
-        transition: transform 0.2s ease;
-    }
-
-    details[open] summary::before {
-        transform: rotate(90deg); /* Rotate arrow when open */
-    }
-
-    #bugContentsAccordionBody {
-        font-size: 0.8em; /* Smaller font for contents */
-        line-height: 1.4;
-        padding: 10px 12px; /* Padding inside the accordion content */
-        color: var(--text-color); /* Ensure text is visible */
-        max-height: 200px; /* Adjust this value as needed for the desired fixed height */
-        overflow-y: auto; /* Enable vertical scrolling */
-    }
-
-    /* Styles for individual bug content segments within the accordion */
-    .bug-content-segment {
-        margin-bottom: 12px; /* Adds space after each segment */
-        padding-bottom: 12px; /* Adds space between content and the divider */
-        border-bottom: 1px dashed rgba(255, 255, 255, 0.1); /* Subtle dashed line divider */
-        font-size: 0.85em; /* Ensures consistent font size */
-        line-height: 1.4; /* Improves readability */
-        color: var(--text-color); /* Ensures text visibility */
-    }
-
-    /* Remove the border and bottom margin from the last segment */
-    .bug-content-segment:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border-bottom: none;
-    }
-
-    /* Buttons */
-    .button-group {
-        display: flex;
-        gap: 15px;
         justify-content: center;
-        margin-top: 20px;
-    }
+        align-items: center;
+        z-index: 50;
+        transition: opacity var(--transition-normal) ease;
+        opacity: 0;
+        pointer-events: none;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border-radius: var(--card-radius);
+      }
+      .output-container.loading .loading-overlay {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary-light);
+        animation: spin 1s linear infinite;
+        box-shadow: var(--neon-primary);
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-    .mdl-button--raised.mdl-button--accent {
-        background-color: var(--success-color); /* Use accent color for accent button */
-        color: var(--on-accent); /* Use on-surface for text color */
-    }
+      /* Status message styling */
+      .status-message {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-md);
+        display: none;
+        word-break: break-word;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: var(--glass-border);
+        box-shadow: var(--glass-shadow);
+      }
 
-    .mdl-button--raised.mdl-button--success {
-        background-color: var(--success-color); /* Use accent color for accent button */
-        color: var(--on-accent); /* Use on-surface for text color */
-    }
+      .status-message.success {
+        background-color: var(--success-bg);
+        color: var(--success-text);
+        border-left: 3px solid var(--success-color);
+      }
 
-    .mdl-button--raised.mdl-button--colored {
-        background-color: var(--error-color); /* Use error color for colored button */
-        color: var(--on-surface); /* Use on-surface for text color */
-    }
+      .status-message.error {
+        background-color: var(--error-bg);
+        color: var(--error-text);
+        border-left: 3px solid var(--error-color);
+      }
 
-    .mdl-button--raised.mdl-button--accent:hover,
-    .mdl-button--raised.mdl-button--colored:hover {
-        opacity: 0.9;
-    }
+      .status-message.info {
+        background-color: rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+        border-left: 3px solid var(--info-color);
+      }
 
-    .mdl-button.mdl-button--icon {
-        color: var(--success-color);
-    }
-    .mdl-button.mdl-button--icon:hover {
-        color: var(--secondary-color);
-    }
+      .status-message a {
+        color: inherit;
+        text-decoration: underline;
+      }
+      /* --- Pure CSS for Toast Messages --- */
+      #toastNotificationsContainer {
+        position: fixed;
+        bottom: 1rem; /* Equivalent to Tailwind's bottom-4 */
+        left: 50%;
+        transform: translateX(-50%) translateY(1rem); /* Hidden state: translate down 1rem */
+        padding: 0.75rem; /* Equivalent to Tailwind's p-3 */
+        border-radius: 0.5rem; /* Equivalent to Tailwind's rounded-lg */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Equivalent to Tailwind's shadow-lg */
+        color: white; /* Equivalent to Tailwind's text-white */
+        transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Smooth transition */
+        opacity: 0; /* Hidden by default */
+        pointer-events: none; /* Prevents interaction when hidden */
+        z-index: 50;
+        display: flex;
+        align-items: center; /* Equivalent to Tailwind's items-center */
+        justify-content: space-between; /* Equivalent to Tailwind's justify-between */
+        min-width: 300px; /* Equivalent to Tailwind's min-w-[300px] */
+        max-width: 400px; /* Equivalent to Tailwind's max-w-sm (approx) */
+        min-height: 48px; /* Ensure minimum height */
+      }
 
-    .mdl-button--raised {
-        border-radius: 20px; /* Pill-shaped buttons */
-        padding: 0 20px;
-        height: 40px;
-    }
+      #toastNotificationsContainer.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0); /* Visible state: no translation */
+        pointer-events: auto; /* Allows interaction when visible */
+      }
 
-    .mdl-button .material-icons {
-        margin-right: 8px;
-    }
-
-    .mdl-typography--caption {
-        color: var(--text-secondary-color);
-        font-style: italic;
-        text-align: center;
-        margin-top: 10px;
-    }
-
-    /* MDL Tabs customization for Glassmorphism (from _dark_mode.html) */
-    .mdl-tabs__tab-bar {
-        background-color: rgba(30, 30, 30, 0.4);
-        border-radius: 10px; /* Rounded corners */
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-1);
-    }
-
-    .mdl-tabs__tab {
-        color: var(--text-secondary-color);
-        transition: color 0.3s ease, background-color 0.3s ease;
-        text-transform: none; /* Keep natural casing */
-    }
-
-    .mdl-tabs.is-upgraded .mdl-tabs__tab.is-active {
-        color: var(--primary-color);
-        font-weight: 500;
-        background-color: rgba(var(--primary-color-rgb), 0.05); /* Subtle highlight */
-    }
-
-    .mdl-tabs__tab:hover {
-        background-color: rgba(var(--primary-color-rgb), 0.05);
-        color: var(--primary-color);
-    }
-
-    .mdl-tabs.is-upgraded .mdl-tabs__tab:after {
-        background: var(--primary-color); /* Active tab indicator */
-    }
-
-    .mdl-button:disabled {
-        background-color: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.3);
-    }
-    .mdl-textfield#hotlistsField.is-focused .hotlistsInputArea {
-         border-bottom: 2px solid var(--primary-color);
-    }
-
-    .hotlist-chip {
-        background-color: rgba(var(--primary-color-rgb), 0.5);
-        border-color: rgba(var(--primary-color-rgb), 0.3);
-        color: var(--text-color);
-        padding: 5px;
-        border-radius: 20px;
+      #toastCloseButton {
+        margin-left: 1rem; /* Equivalent to Tailwind's ml-4 */
+        color: rgba(255, 255, 255, 0.7); /* Lighter text for close button */
+        background: none;
+        border: none;
         cursor: pointer;
-    }
+        font-size: 1.5rem; /* Adjust icon size if needed */
+        line-height: 1; /* For vertical alignment */
+        padding: 0;
+      }
 
-    .hotlist-chip:hover {
-        background-color: rgba(var(--primary-color-rgb), 0.3);
-    }
+      #toastCloseButton:hover {
+        color: white;
+      }
 
-    .mdl-list__item {
-      color: var(--text-color);
-    }
+      /* Container for all toast notifications */
+      .toast-notifications-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: var(--toast-z-index);
+        display: flex;
+        flex-direction: column-reverse; /* Stack new toasts on top */
+        gap: 10px;
+        align-items: flex-end;
+        pointer-events: none; /* Allow clicks to pass through the container */
+        max-height: 80vh; /* Limit the height to avoid filling the entire screen */
+        overflow-y: auto; /* Enable scrolling if many toasts appear */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        scrollbar-width: none; /* Hide scrollbar on Firefox */
+      }
 
-    .mdl-list__item-primary-content span {
-      color: var(--text-color) !important;
-    }
+      .toast-notifications-container::-webkit-scrollbar {
+        display: none; /* Hide scrollbar on Chrome/Safari/Edge */
+      }
 
-    .mdl-list__item-sub-title {
-      color: var(--text-secondary-color) !important;
-    }
+      /* Individual toast notification */
+      .toast-notification {
+        background-color: var(--toast-bg-info); /* Default color */
+        color: var(--toast-text-color);
+        padding: var(--toast-padding);
+        border-radius: var(--toast-border-radius);
+        box-shadow: var(--toast-shadow);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 250px;
+        max-width: var(--toast-max-width);
+        word-break: break-word; /* Handle long text */
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity var(--toast-transition-duration) ease-out,
+          transform var(--toast-transition-duration) ease-out;
+        pointer-events: all; /* Make toasts interactive */
+        font-size: var(--toast-font-size);
+        line-height: var(--toast-line-height);
+        margin-left: auto; /* Right-align toasts */
+        position: relative; /* For potential inner elements positioning */
+        backdrop-filter: blur(2px); /* Subtle glass effect */
+        -webkit-backdrop-filter: blur(2px);
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+      }
 
-    /* General form layout for grouping fields */
-.form-row {
-    display: flex;
-    flex-wrap: wrap; /* Allows items to wrap to the next line on smaller screens */
-    gap: 10px; /* Space between fields */
-    margin-bottom: 10px; /* Space below each row of grouped fields */
-    width: 100%; /* Ensure the row takes full width */
-}
+      /* Toast appearance animation */
+      .toast-notification.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
 
-/* Styles for individual textfield wrappers within a form-row */
-.form-field-half {
-    flex: 1; /* Allows fields to grow and shrink to fill space */
-    min-width: 280px; /* Minimum width before wrapping to a new line */
-}
+      /* Toast spinner for "working" states */
+      .toast-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+        display: inline-block;
+        vertical-align: middle;
+      }
 
-.form-field-third {
-    flex: 1;
-    min-width: 200px; /* Adjust based on desired minimum width for three columns */
-}
+      /* Message text container */
+      .toast-message-text {
+        flex-grow: 1;
+        padding-right: 8px; /* Space for close button */
+        display: flex;
+        align-items: center;
+      }
 
-/* Ensure full-width fields correctly span their container */
-.mdl-textfield.full-width {
-    width: 100%;
-}
+      /* Close button */
+      .toast-close-button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        margin-left: 8px;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+      }
 
-/* Hotlists: Container for selected chips and the input field */
-.hotlists-container-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center; /* Vertically align chips and input */
-    gap: 8px; /* Space between chips and the input */
-    padding: 8px 0; /* Add some vertical padding inside the input area */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* MDL-like border */
-    min-height: 48px; /* Ensure enough height for the input field */
-}
+      .toast-close-button:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
 
-/* Style for the actual visible input inside the hotlists area */
-#hotlistsVisibleInput {
-    flex-grow: 1; /* Allows it to take remaining space */
-    min-width: 150px; /* Ensures it doesn't get too small */
-    border: none; /* Remove default input borders */
-    outline: none; /* Remove focus outline */
-    padding: 0; /* Remove default padding */
-    margin: 0; /* Remove default margin */
-    background: transparent; /* Match MDL textfield background */
-    color: inherit; /* Inherit text color from parent */
-    font-size: 16px; /* Match MDL input font size */
-    line-height: 24px; /* Match MDL input line height */
-}
+      /* Focus styles for accessibility */
+      .toast-close-button:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 2px;
+      }
 
-/* Hotlists: Container for suggestion chips below the input */
-.hotlist-suggestions-container {
-    margin-top: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px; /* Space between suggestion chips */
-}
+      /* Toast background colors using CSS variables */
+      .toast-bg-info {
+        background-color: var(--toast-bg-info);
+      }
 
-/* Basic styling for hotlist chips (selected and suggested) */
-.hotlist-chip-mdl-wrapper { /* Use this class to wrap individual chips if needed for spacing */
-    display: inline-block;
-}
+      .toast-bg-success {
+        background-color: var(--toast-bg-success);
+      }
 
-.mdl-chip{
-  font-size: 10px;
-  padding: 0 10px;
-}
+      .toast-bg-error {
+        background-color: var(--toast-bg-error);
+      }
 
-.mdl-chip.hotlist-chip { /* Apply custom styles to MDL chips */
-    background-color: #616161; /* Example background, adjust for dark mode */
-    color: #fff; /* Text color */
-    border-radius: 16px;
-    cursor: pointer;
-    font-size: 0.8em;
-    height: 32px; /* Standard MDL chip height */
-    line-height: 32px;
-    padding: 0 12px;
-    transition: background-color 0.3s ease;
-    -webkit-tap-highlight-color: transparent; /* Prevents tap highlight on mobile */
-}
+      .toast-bg-warning {
+        background-color: var(--toast-bg-warning);
+      }
 
-.mdl-chip.hotlist-chip:hover {
-    background-color: #757575; /* Slightly lighter on hover */
-}
+      /* Animation for spinner */
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-.mdl-chip.hotlist-chip .mdl-chip__text {
-    /* Style for the text inside the chip if needed */
-    padding: 0; /* Remove default MDL text padding if it causes issues */
-}
+      /* Toast with actions */
+      .toast-notification.has-action {
+        padding-bottom: 8px; /* Less padding at bottom when there are action buttons */
+      }
 
-.mdl-chip.hotlist-chip .mdl-chip__action {
-    /* Style for the 'X' button on chips */
-    font-size: 16px;
-    height: 24px;
-    width: 24px;
-    border-radius: 50%;
-    margin-left: 8px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    line-height: 24px;
-    text-align: center;
-}
-    /* Styles for the new GIF upload UI */
-    .file-upload-container {
-      display: flex; /* Use flexbox for alignment */
-      align-items: center; /* Vertically align items */
-      gap: 8px; /* Space between elements */
-      margin-top: 16px; /* Adjust spacing as needed */
-      margin-bottom: 16px;
-      position: relative; /* For potential positioning of the filename */
-      width: 100%; /* Ensure it takes full available width in its container */
-      min-height: 48px; /* Ensure consistent height with other form fields */
-      font-size: 10px;
-    }
+      /* Container for action buttons */
+      .toast-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 8px;
+        gap: 8px;
+      }
 
-    .file-upload-button {
-      flex-shrink: 0; /* Prevent button from shrinking */
-      font-size: 10px;
-    }
+      /* Action button styling */
+      .toast-action-button {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
 
-    .clear-file-button {
-      flex-shrink: 0; /* Prevent clear button from shrinking */
-      display: flex; /* Ensure icon is centered */
-      align-items: center;
-      justify-content: center;
-      padding: 0; /* Remove default padding */
-      min-width: 24px; /* Smaller min-width for icon button */
-      width: 24px;
-      height: 24px;
-      margin-left: 4px; /* Space between filename and clear button */
-      color: #757575; /* Gray color for icon */
-      background: none; /* No background */
-      border: none; /* No border */
-      cursor: pointer; /* Indicate clickable */
-    }
+      .toast-action-button:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+      }
 
-    .clear-file-button .material-icons {
-      font-size: 20px; /* Small icon size */
-    }
+      /* Responsive adjustments */
+      @media (max-width: 480px) {
+        .toast-notifications-container {
+          right: 10px;
+          left: 10px;
+          align-items: stretch; /* Full width on mobile */
+        }
+
+        .toast-notification {
+          max-width: none; /* Full width */
+          width: 100%;
+          margin-left: 0;
+        }
+      }
+
+      /* --- Pure CSS for Loading Overlay --- */
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.75
+        ); /* Semi-transparent white */
+        z-index: 40;
+        border-radius: 0.5rem; /* Consistent with parent section-container */
+        /* Add this if you want it to hide by default and be controlled by JS */
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+      }
+
+      .loading-overlay.show {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      /* Spinner animation */
+      .loading-spinner {
+        border-radius: 50%;
+        height: 2rem; /* Equivalent to Tailwind's h-8 */
+        width: 2rem; /* Equivalent to Tailwind's w-8 */
+        border-bottom: 2px solid #374151; /* Dark gray for the spinning part */
+        border-top: 2px solid transparent;
+        border-left: 2px solid transparent;
+        border-right: 2px solid transparent;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+
+      /* File upload styling */
+      .file-upload {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+
+      .upload-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--glass-bg-lighter);
+        color: var(--text-color);
+        border-radius: var(--button-radius);
+        border: var(--glass-border);
+        cursor: pointer;
+        transition: all var(--transition-normal) ease;
+        box-shadow: var(--button-shadow);
+        font-size: 0.9rem;
+      }
+
+      .upload-label:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+        box-shadow: var(--button-shadow-hover);
+      }
+
+      .upload-label i {
+        font-size: 1.2rem;
+        color: var(--primary-light);
+      }
+
+      .clear-file-button {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        transition: all var(--transition-normal) ease;
+      }
+
+      .clear-file-button:hover {
+        color: var(--error-color);
+        background-color: rgba(239, 68, 68, 0.1);
+      }
+
+      /* Hotlist chips styling */
+      .hotlists-container {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .chips-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+        margin-bottom: 16px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        border: var(--glass-border);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        transition: all var(--transition-normal) ease;
+      }
+
+      .chip-suggestion {
+        cursor: pointer;
+      }
+
+      .chip-suggestion:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .chip-selected {
+        background: rgba(99, 102, 241, 0.3);
+        border-color: var(--primary-light);
+        box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+        cursor: pointer;
+      }
+
+      .chip-delete {
+        margin-left: 8px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity var(--transition-normal) ease;
+        line-height: 1;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .chip-delete:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .input-with-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-icon {
+        position: absolute;
+        right: 8px;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+      }
+
+      .input-icon:hover {
+        color: var(--primary-light);
+        background-color: rgba(99, 102, 241, 0.1);
+      }
+
+      .button-group {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+      }
+      /* --- RESPONSIVE ADJUSTMENTS --- */
+      @media (min-width: 901px) {
+        /* Desktop layout to ensure side-by-side panels */
+        .panels-wrapper {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--spacing-xl);
+          align-items: flex-start;
+        }
+      }
+      
+      @media (max-width: 900px) {
+        /* Tablet */
+        .container {
+          gap: 1.5rem;
+        }
+        .panels-wrapper {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+        .left-panel,
+        .right-panel {
+          min-width: 100%;
+          padding: 1.5rem;
+          backdrop-filter: blur(var(--glass-blur));
+          -webkit-backdrop-filter: blur(var(--glass-blur));
+          border: var(--glass-border);
+          border-radius: var(--card-radius);
+          background: var(--glass-bg);
+          box-shadow: var(--glass-shadow);
+        }
+        .header-title {
+          font-size: 1.8rem;
+          padding-right: 60px;
+          background: var(--text-gradient-primary);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-shadow: var(--text-glow);
+        }
+
+        .main-header {
+          flex-direction: column;
+          padding: 1rem 0.5rem;
+        }
+
+        .tab-container {
+          background: rgba(15, 23, 42, 0.6);
+          backdrop-filter: blur(var(--glass-blur));
+          -webkit-backdrop-filter: blur(var(--glass-blur));
+          display: flex;
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          border-bottom: var(--glass-border);
+        }
+        .form-row {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .form-field-half,
+        .form-field-third {
+          width: 100%;
+        }
+
+        .input-label {
+          margin-bottom: 0.5rem;
+        }
+
+        .text-input,
+        .select-input,
+        .textarea-input {
+          font-size: 0.9rem;
+          padding: 10px 14px;
+        }
+      }
+      @media (max-width: 600px) {
+        /* Mobile */
+        .header-title {
+          font-size: 1.4rem;
+        }
+        .left-panel,
+        .right-panel {
+          padding: 1.25rem;
+          margin: 0;
+        }
+
+        .main-content {
+          flex: 1;
+          padding: var(--spacing-lg);
+          width: 100%;
+          max-width: 100%;
+          overflow-y: auto;
+          overflow-x: hidden;
+        }
+        .btn {
+          width: 100%;
+          padding: 10px 16px;
+          font-size: 0.9rem;
+        }
+
+        /* Make tab navigation more compact */
+        .tab {
+          padding: var(--spacing-md) var(--spacing-lg);
+          color: var(--text-secondary);
+          text-decoration: none;
+          font-weight: 500;
+          position: relative;
+          white-space: nowrap;
+          transition: color var(--transition-normal) ease;
+          cursor: pointer;
+          letter-spacing: 0.5px;
+        }
+
+        /* Smaller profile image */
+        .profile-avatar {
+          width: 32px;
+          height: 32px;
+        }
+        .status-message {
+          text-align: center;
+          backdrop-filter: blur(var(--glass-blur));
+          -webkit-backdrop-filter: blur(var(--glass-blur));
+          border-radius: 8px;
+          padding: 12px;
+          border: var(--glass-border);
+          font-size: 0.85rem;
+        }
+
+        /* Improved file upload for mobile */
+        .file-upload {
+          width: 100%;
+        }
+
+        .upload-label {
+          width: 100%;
+          justify-content: center;
+          font-size: 0.85rem;
+        }
+
+        /* Better spacing for form groups */
+        .form-group {
+          margin-bottom: var(--spacing-lg);
+          color: white; /* Ensure form elements have white text */
+        }
+
+        /* Make chips more compact */
+        .chip {
+          font-size: 0.75rem;
+          padding: 4px 10px;
+        }
+
+        /* Loading overlay adjustments */
+        .spinner {
+          width: 40px;
+          height: 40px;
+        }
+      }
 </style>

@@ -1,56 +1,180 @@
 <style>
-    /* --- PANELS (Dark Mode Only) --- */
-    .panels-wrapper {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px; /* Limits the wrapper's width */
-      margin: 20px auto; /* Centers the wrapper itself */
-      padding: 0 1rem;
-    }
+      /* --- PANELS --- */
 
-    .mdl-layout__content {
+      /* Panel base styles for glassmorphic effect */
+      .panel {
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        border: var(--glass-border);
+        padding: var(--spacing-lg);
+        overflow: auto;
+        height: 100%;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        box-shadow: var(--glass-shadow);
+        transition: all var(--transition-normal) ease;
+      }
+
+      /* Bug Report Form and Generated Description headers - extra visible */
+      .panel > .section-title,
+      .panel .section-title,
+      .left-panel .section-title,
+      .right-panel .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          90deg,
+          var(--primary-light),
+          var(--accent-light)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        letter-spacing: 0.5px;
+      }
+
+      .panel-scrollable {
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .panel:hover {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25),
+          0 8px 15px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+
+      /* Panel shine effect */
+      .panel::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.08),
+          rgba(255, 255, 255, 0.02)
+        );
+        border-radius: var(--card-radius) var(--card-radius) 0 0;
+        z-index: 0;
+      }
+
+      .panels-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        width: 100%;
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .mdl-layout__content {
         padding: 0;
-    }
+      }
 
-    .mdl-layout__tab-panel {
+      .mdl-layout__tab-panel {
         padding: 0;
-    }
+      }
 
-    .left-panel, .right-panel {
-      flex: 1;
-      min-width: 320px;
-      padding: 1.5rem;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      border-radius: 15px; /* More rounded for Glassmorphism */
-      background-color: var(--background-panel); /* Transparent background */
-      border: 1px solid rgba(var(--background-panel-rgb), 0.2); /* Subtle transparent border */
-      box-shadow: var(--shadow-1);
-      backdrop-filter: blur(10px); /* Glassmorphism blur effect */
-      -webkit-backdrop-filter: blur(10px); /* Safari support */
-      transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease;
-      max-height: calc(100vh - 96px);
-      overflow: scroll;
-    }
-    .left-panel:hover, .right-panel:hover {
-        box-shadow: var(--shadow-2);
-        border-color: rgba(var(--primary-color-rgb), 0.3); /* Border highlights on hover */
-    }
-    .right-panel h3 {
-      color: var(--primary-color);
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-      font-weight: 500;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.5rem;
-      transition: border-bottom-color 0.3s ease;
-    }
+      .left-panel,
+      .right-panel {
+        flex: 1;
+        min-width: 320px;
+        padding: var(--spacing-lg);
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        border-radius: var(--card-radius);
+        background: var(--glass-bg);
+        border: var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        transition: all var(--transition-normal) ease;
+        max-height: calc(100vh - 96px);
+        overflow: auto;
+        position: relative;
+        z-index: 1;
+      }
 
+      /* Glassmorphic panel effects */
+      .left-panel::before,
+      .right-panel::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.08),
+          rgba(255, 255, 255, 0.02)
+        );
+        border-radius: var(--card-radius) var(--card-radius) 0 0;
+        z-index: 0;
+      }
+
+      .left-panel:hover,
+      .right-panel:hover {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25),
+          0 8px 15px rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+
+      .left-panel h3,
+      .right-panel h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: var(--spacing-md);
+        color: white;
+        letter-spacing: 0.5px;
+        padding-bottom: 0.75rem;
+        position: relative;
+        transition: all var(--transition-normal) ease;
+        z-index: 1;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+      }
+
+      .left-panel h3::after,
+      .right-panel h3::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-light),
+          var(--accent-light)
+        );
+        border-radius: 3px;
+        box-shadow: var(--neon-primary);
+      }
+
+      /* Card section within panels */
+      .card-section {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: var(--border-radius-md);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all var(--transition-normal) ease;
+      }
+
+      .card-section:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-2px);
+      }
 </style>

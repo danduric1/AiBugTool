@@ -1,47 +1,63 @@
 <script>
-    const CLIENT_ID = '1060486266130-d963mk3aoeghlv96q07v3mekfknb6hhl.apps.googleusercontent.com';
-    const SHARED_1PAGERS_FOLDER_ID = '1rujBGy9vBFhjFZEZtCfuWvJhWqT39x3p';
-    
-    // --- Global State Variables ---
-    let generatedTitle = "";
-    let generatedBody = "";
+  const CLIENT_ID =
+    "1060486266130-d963mk3aoeghlv96q07v3mekfknb6hhl.apps.googleusercontent.com";
+  const SHARED_1PAGERS_FOLDER_ID = "1rujBGy9vBFhjFZEZtCfuWvJhWqT39x3p";
 
-     // This function is called when the Google APIs client library (gapi) is loaded.
-    function onApiLoad() {
-      console.log("API LOAD CALLED");
-      gapi.load('client:picker', { 'callback': onPickerApiLoad });
-    }
+  // --- Global State Variables ---
+  let generatedTitle = "";
+  let generatedBody = "";
 
-    // Array to store the names of the hotlists currently selected (as chips)
-    let selectedHotlistNames = [];
-    let toastNotificationsContainer; // New: Container for all toasts
-    let activeProcessToasts = new Map(); // New: To manage persistent toasts
-    let currentElapsedTimeToastId = null; // New: To track the AI working toast
+  // This function is called when the Google APIs client library (gapi) is loaded.
+  function onApiLoad() {
+    console.log("API LOAD CALLED");
+    gapi.load("client:picker", { callback: onPickerApiLoad });
+  }
 
-    let currentSessionTokens = 0;
-    let currentSessionCost = 0.00;
-    let startTime = 0;
-    const activeLoadingOverlays = new Map(); 
-    const HOTLIST_MAP = [
-      /** ChromeOS Hotlists */
-      {id: "355247", name: "dps_arc_proactive", type: "ChromeOS"},
-      {id: "292879", name: "arc++", type: "ChromeOS"},
-      {id: "357242", name: "ARC++ 3rdParty AppIssues", type: "ChromeOS"},
-      /** AL Hotlists */
-      {id: "6124440", name: "Appcompat-AL-1Papps", type: "AL", componentIds: ["1624352"]},
-      {id: "6124438", name: "Appcompat-AL-3Papps", type: "AL", componentIds: ["1624252"]},
-      {id: "6154106", name: "Appcompat-Clank-AL", type: "AL", appTypes: ["Web(Clank)"]},
-      {id: "6375526", name: "Appcompat-AL-Platform", type: "AL"},
-      {id: "6200091", name: "AL_appcompat_reviewed", type: "AL"},
-    ];
+  // Array to store the names of the hotlists currently selected (as chips)
+  let selectedHotlistNames = [];
+  let toastNotificationsContainer; // Container for all toasts
+  let activeProcessToasts = new Map(); // To manage persistent toasts
+  let currentElapsedTimeToastId = null; // To track the AI working toast
+  let toastIdCounter = 0; // Counter to generate unique toast IDs
 
+  let currentSessionTokens = 0;
+  let currentSessionCost = 0.0;
+  let startTime = 0;
+  const activeLoadingOverlays = new Map();
+  const HOTLIST_MAP = [
+    /** ChromeOS Hotlists */
+    { id: "355247", name: "dps_arc_proactive", type: "ChromeOS" },
+    { id: "292879", name: "arc++", type: "ChromeOS" },
+    { id: "357242", name: "ARC++ 3rdParty AppIssues", type: "ChromeOS" },
+    /** AL Hotlists */
+    {
+      id: "6124440",
+      name: "Appcompat-AL-1Papps",
+      type: "AL",
+      componentIds: ["1624352"],
+    },
+    {
+      id: "6124438",
+      name: "Appcompat-AL-3Papps",
+      type: "AL",
+      componentIds: ["1624252"],
+    },
+    {
+      id: "6154106",
+      name: "Appcompat-Clank-AL",
+      type: "AL",
+      appTypes: ["Web(Clank)"],
+    },
+    { id: "6375526", name: "Appcompat-AL-Platform", type: "AL" },
+    { id: "6200091", name: "AL_appcompat_reviewed", type: "AL" },
+  ];
 
-    // Caching variables for child bugs and AI summaries
-    const aiSummaryCache = new Map();
+  // Caching variables for child bugs and AI summaries
+  const aiSummaryCache = new Map();
 
-    // --- Constants ---
-    const LINE_DISPLAY_SPEED_MS = 3;
-    const defaultDeviceDetails = `- Google Chrome: <CHROME VERSION. REQUIRED>
+  // --- Constants ---
+  const LINE_DISPLAY_SPEED_MS = 3;
+  const defaultDeviceDetails = `- Google Chrome: <CHROME VERSION. REQUIRED>
 - OS: <REQUIRED FIELD. USER CAN EDIT THIS>
 - Customization ID: <REQUIRED FIELD. USER CAN EDIT THIS>
 - App name: <REQUIRED FIELD. USER CAN EDIT THIS>
@@ -49,665 +65,1028 @@
 - App Version: <REQUIRED FIELD. USER CAN EDIT THIS>
 - App taken from: <REQUIRED FIELD. USER CAN EDIT THIS>`;
 
+  // --- DOM Element References ---
+  // These will be assigned inside DOMContentLoaded
+  let editableBugDescription;
+  let generatedTitleDisplay;
+  let outputContainer;
+  let statusDiv;
+  let generateBtn;
+  let reportBtn;
+  let darkModeToggle;
+  let toggleIcon;
+  let deviceDetailsTextArea;
+  let hotlistsHiddenInput;
+  let hotlistsInputArea;
+  let hotlistsVisibleInput;
+  let hotlistChipsContainer;
+  let componentSelect;
+  let deviceTypeSelect;
+  let deviceModeSelect;
+  let applicationTypeSelect;
+  let bugVerificationDeviceDetails;
+  let sharedDeviceDetails = defaultDeviceDetails;
+  let fetchChildBugsBtn;
+  let reproducibleBtn;
+  let notReproducibleBtn;
+  let childBugList;
+  let childBugListStatus;
+  let aiSummaryDisplay;
+  let bugContentsAccordionBody;
+  let onePagerBugIdsInput;
+  let onePagerDocUrlInput;
+  let triggerOnePagerBtn;
+  let onePagerStatusDiv;
+  let googleSheetLinkInput;
+  let bugIdInput;
+  let masterBugInputSection;
+  let childBugListSection;
+  let verificationSection;
+  let tokensUsedSpan;
+  let costUsedSpan;
+  let userProfileImage;
+  let testReportGoogleSheetUrlInput;
+  let extractedBugIdsDisplay;
+  let appNameInput;
+  let appPackageNameInput;
+  let appVersionInput;
+  let deviceNameInput;
+  let deviceOsVersionInput;
+  let summaryOfTestingInput;
+  let chromeOsFeatureRequestsInput;
+  let priorityChromeOsAppBugsInput;
+  let pixelTabletAppBugsInput;
+  let pickerApiLoaded = false;
+  let oauthToken = "";
+  let gifUploadInput;
+  let selectedGifFile = null;
+  let attachButtonText;
+  let clearGifSelectionButton;
+  // New DOM element references for hotlist containers
+  let selectedHotlistsContainer; // Corresponds to <div id="selectedHotlists">
+  let hotlistSuggestionsContainer; // Corresponds to <div id="hotlistSuggestions">
 
-    // --- DOM Element References ---
-    // These will be assigned inside DOMContentLoaded
-    let editableBugDescription;
-    let generatedTitleDisplay;
-    let outputContainer;
-    let statusDiv;
-    let generateBtn;
-    let reportBtn;
-    let darkModeToggle;
-    let toggleIcon;
-    let deviceDetailsTextArea;
-    let hotlistsHiddenInput;
-    let hotlistsInputArea;
-    let hotlistsVisibleInput;
-    let hotlistChipsContainer;
-    let componentSelect;
-    let deviceTypeSelect;
-    let deviceModeSelect;
-    let applicationTypeSelect;
-    let bugVerificationDeviceDetails;
-    let sharedDeviceDetails = defaultDeviceDetails;
-    let fetchChildBugsBtn;
-    let reproducibleBtn;
-    let notReproducibleBtn;
-    let childBugList;
-    let childBugListStatus;
-    let aiSummaryDisplay;
-    let bugContentsAccordionBody;
-    let onePagerBugIdsInput;
-    let onePagerDocUrlInput;
-    let triggerOnePagerBtn;
-    let onePagerStatusDiv;
-    let googleSheetLinkInput;
-    let bugIdInput;
-    let masterBugInputSection;
-    let childBugListSection;
-    let verificationSection;
-    let tokensUsedSpan;
-    let costUsedSpan;
-    let userProfileImage;
-    let testReportGoogleSheetUrlInput;
-    let extractedBugIdsDisplay;
-    let appNameInput;
-    let appPackageNameInput;
-    let appVersionInput;
-    let deviceNameInput;
-    let deviceOsVersionInput;
-    let summaryOfTestingInput;
-    let chromeOsFeatureRequestsInput;
-    let priorityChromeOsAppBugsInput;
-    let pixelTabletAppBugsInput;
-    let pickerApiLoaded = false;
-    let oauthToken = '';
-    let gifUploadInput;
-    let selectedGifFile = null;
-    let attachButtonText;
-    let clearGifSelectionButton;
 
-    // --- Helper Functions ---
+  // --- Helper Functions ---
 
-    /**
-     * Animates the display of text content.
-     * @param {HTMLElement} element - The DOM element to display text in.
-     * @param {string} text - The text content to display.
-     */
-    function animateTextDisplay(element, text) {
-        let i = 0;
-        element.textContent = ''; // Clear existing content
-        const intervalId = setInterval(() => {
-            if (i < text.length) {
-                element.textContent += text.charAt(i);
-                i++;
-            } else {
-                clearInterval(intervalId);
-            }
-        }, LINE_DISPLAY_SPEED_MS);
-    }
+  /**
+   * Animates the display of text content.
+   * @param {HTMLElement} element - The DOM element to display text in.
+   * @param {string} text - The text content to display.
+   */
+  function animateTextDisplay(element, text) {
+    let i = 0;
+    element.textContent = ""; // Clear existing content
+    // Add a subtle glassmorphic "cursor" effect during typing
+    element.classList.add("typing");
 
-    // This function is called when the Picker API itself is loaded.
-    function onPickerApiLoad() {
-      pickerApiLoaded = true;
-      // Enable the button once API is ready.
-      const openDrivePickerBtn = document.getElementById('openDrivePickerBtn');
-      if (openDrivePickerBtn) {
-        openDrivePickerBtn.disabled = false;
+    const intervalId = setInterval(() => {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        i++;
+      } else {
+        clearInterval(intervalId);
+        // Remove cursor effect when typing is complete
+        element.classList.remove("typing");
       }
-      console.log("Google Picker API loaded.");
+    }, LINE_DISPLAY_SPEED_MS);
+  }
+
+  // This function is called when the Picker API itself is loaded.
+  function onPickerApiLoad() {
+    pickerApiLoaded = true;
+    // Enable the button once API is ready.
+    const openDrivePickerBtn = document.getElementById("openDrivePickerBtn");
+    if (openDrivePickerBtn) {
+      openDrivePickerBtn.disabled = false;
+    }
+    console.log("Google Picker API loaded.");
+  }
+
+  /**
+   * Initiates the OAuth flow to get an access token and then opens the Google Picker.
+   */
+  function getAuthTokenAndOpenPicker() {
+    if (!pickerApiLoaded) {
+      showToast("Google Picker API is not yet loaded. Please wait.", "warning");
+      return;
     }
 
-    /**
-     * Initiates the OAuth flow to get an access token and then opens the Google Picker.
-     */
-    function getAuthTokenAndOpenPicker() {
-      if (!pickerApiLoaded) {
-        showToast('Google Picker API is not yet loaded. Please wait.', 'warning');
-        return;
+    showToast(
+      "Authorizing Google Drive access...",
+      "info",
+      5000,
+      "driveAuthProcess"
+    );
+
+    // Call the Apps Script function to get the OAuth token for the current user
+    google.script.run
+      .withSuccessHandler(function (token) {
+        oauthToken = token;
+        createPicker(); // Once token is received, create and open the picker
+      })
+      .withFailureHandler(function (error) {
+        showToast(
+          "Error authorizing Drive: " + error.message,
+          "error",
+          10000,
+          "driveAuthError"
+        );
+        console.error("Drive authorization error:", error);
+      })
+      .getOAuthToken(); // This calls the function in your code.gs
+  }
+
+  /**
+   * Creates and displays the Google Picker dialog.
+   * This is the core logic for the interactive Drive file selection.
+   */
+  function createPicker() {
+    if (!oauthToken) {
+      showToast("OAuth token not available. Cannot open Picker.", "error");
+      return;
+    }
+
+    const view = new google.picker.View(google.picker.ViewId.SPREADSHEETS);
+    view.setMimeTypes("application/vnd.google-apps.spreadsheet");
+
+    const docsView = new google.picker.DocsView();
+    docsView.setMimeTypes("application/vnd.google-apps.spreadsheet");
+    docsView.setIncludeFolders(true);
+
+    if (SHARED_1PAGERS_FOLDER_ID && SHARED_1PAGERS_FOLDER_ID.trim() !== "") {
+      docsView.setParent(SHARED_1PAGERS_FOLDER_ID);
+    }
+
+    // Build the Picker
+    const picker = new google.picker.PickerBuilder()
+      .enableFeature(google.picker.Feature.NAV_ARGS)
+      .setOAuthToken(oauthToken)
+      .setAppId(CLIENT_ID)
+      .addView(view)
+      .addView(docsView)
+      .setCallback(pickerCallback)
+      .setOrigin("https://script.google.com")
+      .build();
+
+    picker.setVisible(true);
+  }
+
+  /**
+   * Callback function for the Google Picker.
+   * This is executed when the user selects a file (or cancels).
+   * @param {object} data The data returned from the Picker.
+   */
+  function pickerCallback(data) {
+    if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
+      const doc = data[google.picker.Response.DOCUMENTS][0];
+      const targetDocUrl = doc.url; // This is the URL you're getting
+
+      // Get a reference to your text field input element
+      const targetDocUrlInput = document.getElementById(
+        "testReportGoogleSheetUrl"
+      );
+
+      if (targetDocUrlInput) {
+        // 1. Set the value of the input field
+        targetDocUrlInput.value = targetDocUrl;
+
+        // 2. IMPORTANT: Force MDL to recognize the change
+        //    Check if the MDL component is available on the parent
+        const parentContainer = document.getElementById(
+          "target-doc-url-container"
+        );
+
+
+        // 3. Manually trigger the 'input' event to fire your event listener
+        //    This mimics a user typing or pasting.
+        const event = new Event("input", { bubbles: true });
+        targetDocUrlInput.dispatchEvent(event);
+
+        // Optional: You might want to focus the field briefly to ensure all browser events fire
+        // targetDocUrlInput.focus();
+      }
+      showToast("Document selected!", "success", 3000);
+    } else if (
+      data[google.picker.Response.ACTION] === google.picker.Action.CANCEL
+    ) {
+      showToast("Picker canceled.", "info", 3000);
+    }
+  }
+
+  /**
+   * Displays a toast message notification.
+   * @param {string} message - The text content of the toast message.
+   * @param {string} [type='info'] - The type of message: 'info', 'success', 'error', 'warning'.
+   * @param {number|null} [duration=5000] - The duration in milliseconds before auto-closing. Set to null or Infinity for persistent toasts.
+   * @param {string|null} [toastId=null] - A unique ID for the toast. Useful for updating/removing specific process-related toasts.
+   * @param {Array<{text: string, onClick: Function, ariaLabel: string}>} [actions=[]] - Optional array of action buttons to add to the toast.
+   * @returns {string} The ID of the created or updated toast.
+   */
+  function showToast(
+    message,
+    type = "info",
+    duration = 5000,
+    toastId = null,
+    actions = []
+  ) {
+    if (!toastNotificationsContainer) {
+      console.error("Toast notifications container not found.");
+      return null;
+    }
+
+    // Generate a unique ID if not provided
+    if (!toastId) {
+      toastId = `toast-${Date.now()}-${toastIdCounter++}`;
+    }
+
+    let toastElement;
+    let isNewToast = false;
+
+    if (activeProcessToasts.has(toastId)) {
+      // Update existing toast if toastId is provided and it's active
+      toastElement = activeProcessToasts.get(toastId);
+      const messageTextSpan = toastElement.querySelector(".toast-message-text");
+      if (messageTextSpan) {
+        messageTextSpan.innerHTML = message;
       }
 
-      showToast('Authorizing Google Drive access...', 'info', 5000, 'driveAuthProcess');
+      // Update the toast type if it's changed
+      toastElement.className = toastElement.className.replace(
+        /toast-bg-\w+/,
+        `toast-bg-${type}`
+      );
+    } else {
+      // Create new toast element
+      isNewToast = true;
+      toastElement = document.createElement("div");
+      toastElement.className = `toast-notification toast-bg-${type}`;
+      toastElement.setAttribute("data-toast-id", toastId);
+      toastElement.setAttribute("role", "alert"); // Accessibility: announce to screen readers
+      toastElement.setAttribute("aria-live", "polite"); // Announce changes without interrupting
 
-      // Call the Apps Script function to get the OAuth token for the current user
-      google.script.run
-        .withSuccessHandler(function(token) {
-          oauthToken = token;
-          createPicker(); // Once token is received, create and open the picker
-        })
-        .withFailureHandler(function(error) {
-            showToast('Error authorizing Drive: ' + error.message, 'error', 10000, 'driveAuthError');          console.error('Drive authorization error:', error);
-        })
-        .getOAuthToken(); // This calls the function in your code.gs
-    }
+      // Add the message content and close button
+      toastElement.innerHTML = `
+        <span class="toast-message-text">${message}</span>
+        <button type="button" class="toast-close-button" aria-label="Close notification">&times;</button>
+      `;
 
-    /**
-     * Creates and displays the Google Picker dialog.
-     * This is the core logic for the interactive Drive file selection.
-     */
-    function createPicker() {
-      if (!oauthToken) {
-        showToast('OAuth token not available. Cannot open Picker.', 'error');
-        return;
-      }
+      // Add actions if provided
+      if (actions && actions.length > 0) {
+        toastElement.classList.add("has-action");
+        const actionsContainer = document.createElement("div");
+        actionsContainer.className = "toast-actions";
 
-      const view = new google.picker.View(google.picker.ViewId.SPREADSHEETS);
-      view.setMimeTypes('application/vnd.google-apps.spreadsheet');
-
-      const docsView = new google.picker.DocsView();
-      docsView.setMimeTypes('application/vnd.google-apps.spreadsheet');
-      docsView.setIncludeFolders(true); 
-
-      if (SHARED_1PAGERS_FOLDER_ID && SHARED_1PAGERS_FOLDER_ID.trim() !== '') {
-        docsView.setParent(SHARED_1PAGERS_FOLDER_ID);
-      }
-
-      // Build the Picker
-      const picker = new google.picker.PickerBuilder()
-        .enableFeature(google.picker.Feature.NAV_ARGS)
-        .setOAuthToken(oauthToken)
-        .setAppId(CLIENT_ID)
-        .addView(view)
-        .addView(docsView)
-        .setCallback(pickerCallback)
-        .setOrigin('https://script.google.com')
-        .build();
-
-      picker.setVisible(true);
-    }
-
-    /**
-     * Callback function for the Google Picker.
-     * This is executed when the user selects a file (or cancels).
-     * @param {object} data The data returned from the Picker.
-     */
-    function pickerCallback(data) {
-      if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
-        const doc = data[google.picker.Response.DOCUMENTS][0];
-        const targetDocUrl = doc.url; // This is the URL you're getting
-
-        // Get a reference to your text field input element
-        const targetDocUrlInput = document.getElementById('testReportGoogleSheetUrl');
-
-        if (targetDocUrlInput) {
-          // 1. Set the value of the input field
-          targetDocUrlInput.value = targetDocUrl;
-
-          // 2. IMPORTANT: Force MDL to recognize the change
-          //    Check if the MDL component is available on the parent
-          const parentContainer = document.getElementById('target-doc-url-container');
-          if (parentContainer && parentContainer.MaterialTextfield) {
-            // This method specifically updates the label/dirty state
-            parentContainer.MaterialTextfield.checkDirty();
-          } else if (window.componentHandler) {
-            // Fallback: If checkDirty() isn't available, or for other MDL elements,
-            // you can try upgrading the entire component, though checkDirty is more targeted for input value changes.
-            window.componentHandler.upgradeElement(parentContainer);
-          }
-
-          // 3. Manually trigger the 'input' event to fire your event listener
-          //    This mimics a user typing or pasting.
-          const event = new Event('input', { bubbles: true });
-          targetDocUrlInput.dispatchEvent(event);
-
-          // Optional: You might want to focus the field briefly to ensure all browser events fire
-          // targetDocUrlInput.focus();
-        }
-        showToast('Document selected!', 'success', 3000);
-      } else if (data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
-          showToast('Picker canceled.', 'info', 3000);
-        }
-    }
-
-    /**
-     * Displays a toast message at the bottom of the screen.
-     * @param {string} message - The text content of the toast message.
-     * @param {string} [type='info'] - The type of message: 'info', 'success', 'error', 'warning'.
-     * @param {number|null} [duration=5000] - The duration in milliseconds before auto-closing. Set to null or Infinity for persistent toasts.
-     * @param {string|null} [toastId=null] - A unique ID for the toast. Useful for updating/removing specific process-related toasts.
-     */
-    function showToast(message, type = 'info', duration = 5000, toastId = null) {
-        if (!toastNotificationsContainer) {
-            console.error("Toast notifications container not found.");
-            return;
-        }
-
-        let toastElement;
-        if (toastId && activeProcessToasts.has(toastId)) {
-            // Update existing toast if toastId is provided and it's active
-            toastElement = activeProcessToasts.get(toastId);
-            const messageTextSpan = toastElement.querySelector('.toast-message-text');
-            if (messageTextSpan) {
-                messageTextSpan.innerHTML = message;
+        actions.forEach((action, index) => {
+          const actionButton = document.createElement("button");
+          actionButton.className = "toast-action-button";
+          actionButton.textContent = action.text;
+          actionButton.setAttribute(
+            "aria-label",
+            action.ariaLabel || action.text
+          );
+          actionButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (typeof action.onClick === "function") {
+              action.onClick();
             }
-        } else {
-            // Create new toast element
-            toastElement = document.createElement('div');
-            toastElement.className = `toast-notification toast-bg-${type}`;
-            if (toastId) {
-                toastElement.setAttribute('data-toast-id', toastId);
-            }
-
-            toastElement.innerHTML = `
-                <span class="toast-message-text">${message}</span>
-                <button type="button" class="toast-close-button">&times;</button>
-            `;
-
-            const closeButton = toastElement.querySelector('.toast-close-button');
-            closeButton.addEventListener('click', () => hideToast(toastElement));
-
-            toastNotificationsContainer.appendChild(toastElement);
-            // Force reflow to enable transition
-            toastElement.offsetHeight;
-        }
-
-        // Add or remove spinner based on message content for AI working toasts
-        const messageTextSpan = toastElement.querySelector('.toast-message-text');
-        if (messageTextSpan) {
-            const spinnerHtml = '<div class="toast-spinner"></div>';
-            if (message.includes("AI is working...") && !messageTextSpan.querySelector('.toast-spinner')) {
-                // Prepend spinner if message implies AI work and spinner isn't there
-                messageTextSpan.innerHTML = spinnerHtml + message;
-            } else if (!message.includes("AI is working...") && messageTextSpan.querySelector('.toast-spinner')) {
-                // Remove spinner if message no longer implies AI work but spinner is there
-                messageTextSpan.innerHTML = message.replace(spinnerHtml, '');
-            }
-        }
-
-
-        toastElement.classList.add('show');
-
-        // Set auto-close timeout unless duration is null or Infinity
-        if (duration !== null && duration !== Infinity) {
-            toastElement.dataset.timeoutId = setTimeout(() => hideToast(toastElement), duration);
-        } else if (toastId) {
-            // If it's a persistent toast, add it to activeProcessToasts
-            activeProcessToasts.set(toastId, toastElement);
-        }
-    }
-
-    /**
-     * Hides and removes a specific toast element.
-     * @param {HTMLElement} toastElement - The toast DOM element to hide.
-     */
-    function hideToast(toastElement) {
-        if (!toastElement) return;
-
-        toastElement.classList.remove('show'); // Start fade out
-
-        // Clear any associated timeout
-        const timeoutId = toastElement.dataset.timeoutId;
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-        }
-
-        // Remove from DOM after transition
-        toastElement.addEventListener('transitionend', () => {
-            if (toastElement.parentNode) {
-                toastElement.parentNode.removeChild(toastElement);
-            }
-        }, { once: true }); // Ensure listener is removed after first execution
-
-        // If it's a process toast, remove it from the active map
-        const toastId = toastElement.dataset.toastId;
-        if (toastId && activeProcessToasts.has(toastId)) {
-            activeProcessToasts.delete(toastId);
-            // If this was the elapsed time toast, clear its interval
-            if (toastId === currentElapsedTimeToastId) {
-                if (_elapsedTimeIntervalId) {
-                    clearInterval(_elapsedTimeIntervalId);
-                    _elapsedTimeIntervalId = null;
-                    startTime = 0; // Reset start time
-                }
-                currentElapsedTimeToastId = null;
-            }
-        }
-    }
-
-    /**
-     * Removes a persistent toast by its ID.
-     * @param {string} toastId - The unique ID of the toast to remove.
-     */
-    function removeProcessToast(toastId) {
-        const toastElement = activeProcessToasts.get(toastId);
-        if (toastElement) {
-            hideToast(toastElement);
-        }
-    }
-
-
-
-    /**
-     * Shows a loading overlay with a spinner on a target element.
-     * The overlay covers the target element and blocks interaction.
-     * @param {HTMLElement} targetElement The element to cover with the loading overlay.
-     */
-    function showLoadingOverlay(targetElement) {
-        console.log(`Showing loading overlay for: ${targetElement.id}`);
-
-        // Ensure the target element is positioned, so the absolute overlay works correctly
-        if (window.getComputedStyle(targetElement).position === 'static') {
-            targetElement.style.position = 'relative';
-        }
-
-        let overlay = activeLoadingOverlays.get(targetElement);
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'loading-overlay';
-            overlay.innerHTML = `
-                <div class="loading-spinner"></div>
-            `;
-            targetElement.appendChild(overlay);
-            activeLoadingOverlays.set(targetElement, overlay);
-        }
-        overlay.classList.add('show');
-    }
-
-    /**
-     * Hides the loading overlay from a target element.
-     * @param {HTMLElement} targetElement The element from which to remove the loading overlay.
-     * @param {string|null} [associatedToastId=null] - Optional ID of a process toast to remove.
-     */
-    function hideLoadingOverlay(targetElement, associatedToastId = null) {
-        console.log(`Hiding loading overlay for: ${targetElement.id}`);
-        const overlay = activeLoadingOverlays.get(targetElement);
-        if (overlay) {
-            overlay.classList.remove('show');
-            // Remove from the map after fading out to allow re-showing if needed
-            overlay.addEventListener('transitionend', () => {
-                if (!overlay.classList.contains('show')) { // Ensure it's hidden before removing from map
-                    activeLoadingOverlays.delete(targetElement);
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                }
-            }, { once: true });
-        }
-        if (associatedToastId) {
-            removeProcessToast(associatedToastId);
-        }
-    }
-
-    /**
-     * Internal variable to hold the interval ID for elapsed time updates.
-     * Declared here to be accessible within the start/stop functions via closure.
-     */
-    let _elapsedTimeIntervalId = null;
-    let _elapsedTimeStartTime = 0;
-
-    function startElapsedTimeUpdater(processId, baseMessage = "AI is working...") {
-        // Clear any previously running interval to ensure only one is active
-        if (_elapsedTimeIntervalId) { // Use the encapsulated variable
-            clearInterval(_elapsedTimeIntervalId);
-        }
-
-        currentElapsedTimeToastId = processId; // Keep this global as it tracks the toast ID
-        _elapsedTimeStartTime = Date.now(); // Use the encapsulated variable
-
-        // Show the initial toast message
-        showToast(`${baseMessage} (0.0s)`, "info", Infinity, currentElapsedTimeToastId);
-
-        _elapsedTimeIntervalId = setInterval(() => { // Use the encapsulated variable
-            const elapsedTime = (Date.now() - _elapsedTimeStartTime) / 1000; // Use the encapsulated variable
-            // Update the existing toast with the new elapsed time
-            showToast(`${baseMessage} (${elapsedTime.toFixed(1)}s)`, "info", Infinity, currentElapsedTimeToastId);
-        }, 100); // Update every 100ms for smoother animation
-        console.log(`Started elapsed time updater for process: ${processId}`);
-    }
-
-    /**
-     * Stops the elapsed time updater and removes the associated toast.
-     */
-    function stopElapsedTimeUpdater() {
-        if (_elapsedTimeIntervalId) { // Use the encapsulated variable
-            clearInterval(_elapsedTimeIntervalId);
-            _elapsedTimeIntervalId = null; // Reset
-            _elapsedTimeStartTime = 0; // Reset
-            console.log("Stopped elapsed time updater.");
-        }
-        // Explicitly remove the toast that was being updated, if it still exists
-        if (currentElapsedTimeToastId) {
-            removeProcessToast(currentElapsedTimeToastId);
-            currentElapsedTimeToastId = null; // Clear the tracking ID
-        }
-    }
-
-
-    /**
-     * Upgrades an MDL Textfield to ensure its label and ripple behave correctly.
-     * @param {HTMLElement} inputElement - The input element (e.g., textarea, input)
-     */
-    function upgradeMdlTextField(inputElement) {
-        if (!inputElement || !inputElement.parentNode) return;
-
-        const mdlTextfield = inputElement.closest('.mdl-textfield');
-        if (mdlTextfield) {
-            // Manually check if input has value to apply 'is-dirty'
-            if (inputElement.value && inputElement.value.trim() !== '') {
-                mdlTextfield.classList.add('is-dirty');
-            } else {
-                mdlTextfield.classList.remove('is-dirty');
-            }
-            // If the element is a textarea, ensure 'is-focused' is handled on input
-            if (inputElement.tagName === 'TEXTAREA') {
-                inputElement.addEventListener('focus', () => mdlTextfield.classList.add('is-focused'));
-                inputElement.addEventListener('blur', () => mdlTextfield.classList.remove('is-focused'));
-            }
-            // Ensure the MDL component is upgraded
-            if (window.componentHandler) {
-                window.componentHandler.upgradeElement(mdlTextfield);
-            }
-        }
-    }
-
-    /**
-     * Adds a chip to the hotlists input area.
-     * @param {string} chipText - The text for the chip.
-     */
-    function addHotlistChip(chipText) {
-        if (selectedHotlistNames.includes(chipText)) {
-            showToast(`'${chipText}' is already added.`, 'info');
-            return;
-        }
-
-        const chip = document.createElement('span');
-        chip.className = 'hotlist-chip mdl-chip mdl-chip--deletable';
-        chip.innerHTML = `
-            <span class="mdl-chip__text">${chipText}</span>
-            <button type="button" class="mdl-chip__action"><i class="material-icons">cancel</i></button>
-        `;
-        // Find the visible input and insert the chip before it
-        if (hotlistsVisibleInput && hotlistsInputArea) {
-             hotlistsInputArea.insertBefore(chip, hotlistsVisibleInput);
-        } else {
-            // Fallback if hotlistsVisibleInput isn't found (shouldn't happen if initialized)
-            hotlistsInputArea.appendChild(chip);
-        }
-
-        selectedHotlistNames.push(chipText);
-        updateHotlistsHiddenInput();
-
-        // Add event listener for chip deletion
-        chip.querySelector('.mdl-chip__action').addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevent input area focus
-            chip.remove();
-            selectedHotlistNames = selectedHotlistNames.filter(name => name !== chipText);
-            updateHotlistsHiddenInput();
-            showToast(`Removed '${chipText}'.`, 'info');
-            hotlistsVisibleInput.focus(); // Keep focus on the input after removing
+          });
+          actionsContainer.appendChild(actionButton);
         });
-        showToast(`Added '${chipText}'.`, 'success');
-        hotlistsVisibleInput.value = ''; // Clear the visible input after adding
-        hotlistsVisibleInput.focus(); // Keep focus on the input
-        upgradeMdlTextField(hotlistsVisibleInput); // Update MDL state for the input
+
+        // Insert after the message text
+        const messageTextEl = toastElement.querySelector(".toast-message-text");
+        messageTextEl.parentNode.insertBefore(
+          actionsContainer,
+          messageTextEl.nextSibling
+        );
+      }
+
+      // Add click handler for close button
+      const closeButton = toastElement.querySelector(".toast-close-button");
+      closeButton.addEventListener("click", () => hideToast(toastElement));
+
+      // Add to DOM and prepare for animation
+      toastNotificationsContainer.appendChild(toastElement);
+      // Force reflow to enable transition
+      toastElement.offsetHeight;
     }
 
-    /**
-     * Updates the hidden input field with a comma-separated list of selected hotlist names.
-     */
-    function updateHotlistsHiddenInput() {
-        if (hotlistsHiddenInput) {
-            hotlistsHiddenInput.value = selectedHotlistNames.join(',');
+    // Add or update spinner for "working" states
+    const messageTextSpan = toastElement.querySelector(".toast-message-text");
+    if (messageTextSpan) {
+      if (
+        message.includes("working") ||
+        message.includes("loading") ||
+        message.includes("processing")
+      ) {
+        // Only add spinner if it doesn't already exist
+        if (!messageTextSpan.querySelector(".toast-spinner")) {
+          const spinnerEl = document.createElement("div");
+          spinnerEl.className = "toast-spinner";
+          messageTextSpan.insertBefore(spinnerEl, messageTextSpan.firstChild);
         }
+      } else {
+        // Remove spinner if it exists but message no longer implies work
+        const spinner = messageTextSpan.querySelector(".toast-spinner");
+        if (spinner) {
+          spinner.remove();
+        }
+      }
     }
 
-    /**
-    * Updates the token and cost display in the header.
-    * @param {number} tokens - The number of tokens to add to the total.
-    * @param {number} cost - The cost to add to the total.
-    */
-    function updateTokenAndCost(tokens, cost) {
-        currentSessionTokens += tokens;
-        currentSessionCost += cost;
+    // Show the toast
+    toastElement.classList.add("show");
 
-        if (tokensUsedSpan) {
-            tokensUsedSpan.textContent = currentSessionTokens;
+    // Clear any existing timeout for this toast
+    if (toastElement.dataset.timeoutId) {
+      clearTimeout(parseInt(toastElement.dataset.timeoutId));
+    }
+
+    // Set auto-close timeout unless duration is null or Infinity
+    if (duration !== null && duration !== Infinity) {
+      const timeoutId = setTimeout(() => hideToast(toastElement), duration);
+      toastElement.dataset.timeoutId = timeoutId;
+    }
+
+    // Store persistent toasts in the map
+    if (duration === null || duration === Infinity) {
+      activeProcessToasts.set(toastId, toastElement);
+    } else if (
+      isNewToast &&
+      toastNotificationsContainer.childNodes.length > 5
+    ) {
+      // If there are too many toasts, remove the oldest (except persistent ones)
+      const nonPersistentToasts = Array.from(
+        toastNotificationsContainer.childNodes
+      ).filter(
+        (t) => !activeProcessToasts.has(t.getAttribute("data-toast-id"))
+      );
+
+      if (nonPersistentToasts.length > 5) {
+        hideToast(nonPersistentToasts[0]); // Remove oldest non-persistent toast
+      }
+    }
+
+    return toastId;
+  }
+
+  /**
+   * Hides and removes a specific toast element.
+   * @param {HTMLElement} toastElement - The toast DOM element to hide.
+   */
+  function hideToast(toastElement) {
+    if (!toastElement) return;
+
+    toastElement.classList.remove("show"); // Start fade out
+    toastElement.setAttribute("aria-hidden", "true"); // Accessibility: mark as hidden
+
+    // Clear any associated timeout
+    const timeoutId = toastElement.dataset.timeoutId;
+    if (timeoutId) {
+      clearTimeout(parseInt(timeoutId));
+      delete toastElement.dataset.timeoutId;
+    }
+
+    // Remove from DOM after transition
+    toastElement.addEventListener(
+      "transitionend",
+      () => {
+        if (toastElement.parentNode) {
+          toastElement.parentNode.removeChild(toastElement);
         }
-        if (costUsedSpan) {
-            costUsedSpan.textContent = currentSessionCost.toFixed(2); // Format to 2 decimal places
+      },
+      { once: true }
+    );
+
+    // If it's a process toast, remove it from the active map
+    const toastId = toastElement.getAttribute("data-toast-id");
+    if (toastId && activeProcessToasts.has(toastId)) {
+      activeProcessToasts.delete(toastId);
+
+      // If this was the elapsed time toast, clear its interval
+      if (toastId === currentElapsedTimeToastId) {
+        if (_elapsedTimeIntervalId) {
+          clearInterval(_elapsedTimeIntervalId);
+          _elapsedTimeIntervalId = null;
         }
-     }
+        currentElapsedTimeToastId = null;
+      }
+    }
+  }
 
-/**
-     * Fetches suggested hotlists based on component and device type.
-     * @param {string} component - The selected component.
-     * @param {string} deviceType - The selected device type.
-     * @param {string} applicationType - The selected application type.
-     */
-    function fetchSuggestedHotlists(component, deviceType, applicationType) {
-        console.log(`[CLIENT] fetchSuggestedHotlists called with: comp=${component}, device=${deviceType}, app=${applicationType}`);
+  /**
+   * Removes a persistent toast by its ID.
+   * @param {string} toastId - The unique ID of the toast to remove.
+   * @returns {boolean} True if the toast was found and removed, false otherwise.
+   */
+  function removeProcessToast(toastId) {
+    const toastElement = activeProcessToasts.get(toastId);
+    if (toastElement) {
+      hideToast(toastElement);
+      return true;
+    }
+    return false;
+  }
 
-        // Defensive check: Re-get the container if the global variable is null.
-        // This handles cases where the function might be called before DOMContentLoaded finishes
-        // setting the global variable, or if the element was removed/re-added.
-        if (!hotlistChipsContainer) {
-            hotlistChipsContainer = document.getElementById('hotlistChipsContainer');
-            if (!hotlistChipsContainer) {
-                console.error("[CLIENT] hotlistChipsContainer still not found after re-attempt. Cannot proceed with hotlist suggestions.");
-                return;
+  /**
+   * Updates an existing toast with new content and/or settings.
+   * @param {string} toastId - The ID of the toast to update.
+   * @param {Object} options - The options to update.
+   * @param {string} [options.message] - New message text.
+   * @param {string} [options.type] - New toast type (info, success, error, warning).
+   * @param {number|null} [options.duration] - New duration before auto-close.
+   * @param {Array} [options.actions] - New action buttons array.
+   * @returns {boolean} True if the toast was found and updated, false otherwise.
+   */
+  function updateToast(toastId, { message, type, duration, actions } = {}) {
+    if (!toastId || !activeProcessToasts.has(toastId)) {
+      return false;
+    }
+
+    // Get existing toast
+    const toastElement = activeProcessToasts.get(toastId);
+
+    // Update message if provided
+    if (message !== undefined) {
+      const messageTextSpan = toastElement.querySelector(".toast-message-text");
+      if (messageTextSpan) {
+        // Preserve spinner if it exists
+        const spinner = messageTextSpan.querySelector(".toast-spinner");
+        messageTextSpan.innerHTML = message;
+        if (
+          spinner &&
+          (message.includes("working") || message.includes("loading"))
+        ) {
+          messageTextSpan.insertBefore(
+            spinner.cloneNode(true),
+            messageTextSpan.firstChild
+          );
+        }
+      }
+    }
+
+    // Update type if provided
+    if (type !== undefined) {
+      toastElement.className = toastElement.className.replace(
+        /toast-bg-\w+/,
+        `toast-bg-${type}`
+      );
+    }
+
+    // Update duration if provided
+    if (duration !== undefined) {
+      // Clear existing timeout
+      if (toastElement.dataset.timeoutId) {
+        clearTimeout(parseInt(toastElement.dataset.timeoutId));
+        delete toastElement.dataset.timeoutId;
+      }
+
+      // Set new timeout if not persistent
+      if (duration !== null && duration !== Infinity) {
+        const timeoutId = setTimeout(() => hideToast(toastElement), duration);
+        toastElement.dataset.timeoutId = timeoutId;
+      }
+    }
+
+    // Update actions if provided
+    if (actions !== undefined) {
+      // Remove existing actions container
+      const existingActions = toastElement.querySelector(".toast-actions");
+      if (existingActions) {
+        existingActions.remove();
+      }
+
+      // Add new actions if any
+      if (actions && actions.length > 0) {
+        toastElement.classList.add("has-action");
+        const actionsContainer = document.createElement("div");
+        actionsContainer.className = "toast-actions";
+
+        actions.forEach((action) => {
+          const actionButton = document.createElement("button");
+          actionButton.className = "toast-action-button";
+          actionButton.textContent = action.text;
+          actionButton.setAttribute(
+            "aria-label",
+            action.ariaLabel || action.text
+          );
+          actionButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (typeof action.onClick === "function") {
+              action.onClick();
             }
-        }
+          });
+          actionsContainer.appendChild(actionButton);
+        });
 
-        google.script.run
-            .withSuccessHandler(suggestedHotlists => {
-                console.log("[CLIENT] Server returned suggested hotlists:", suggestedHotlists);
-                hotlistChipsContainer.innerHTML = ''; // Clear previous suggestions
-                if (suggestedHotlists && suggestedHotlists.length > 0) {
-                    suggestedHotlists.forEach(hotlist => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'hotlist-chip-suggestion-wrapper';
-                        const chip = document.createElement('span');
-                        chip.className = 'hotlist-chip'; // Apply base chip styling
-                        chip.textContent = hotlist;
-                        chip.title = `Click to add ${hotlist}`;
-                        chip.addEventListener('click', () => addHotlistChip(hotlist));
-                        wrapper.appendChild(chip);
-                        hotlistChipsContainer.appendChild(wrapper);
-
-                        // IMPORTANT: Upgrade the newly added chip for MDL styling
-                        if (window.componentHandler) {
-                            window.componentHandler.upgradeElement(chip);
-                            console.log(`[CLIENT] Upgraded suggestion chip: ${hotlist}`);
-                        } else {
-                            console.warn("[CLIENT] componentHandler not available for upgrading suggestion chips.");
-                        }
-                    });
-                } else {
-                    hotlistChipsContainer.innerHTML = '<span class="status-message status-info">No hotlist suggestions for this combination.</span>';
-                    console.log("[CLIENT] No hotlist suggestions found or returned.");
-                }
-            })
-            .withFailureHandler(error => {
-                console.error("[CLIENT] Error fetching hotlist suggestions:", error);
-                showToast("Error fetching hotlist suggestions.", 'error', 10000, 'hotlistSuggestError');
-            })
-            .fetchHotlistSuggestions(component, deviceType, applicationType);
+        // Insert after the message text
+        const messageTextEl = toastElement.querySelector(".toast-message-text");
+        messageTextEl.parentNode.insertBefore(
+          actionsContainer,
+          messageTextEl.nextSibling
+        );
+      } else {
+        toastElement.classList.remove("has-action");
+      }
     }
 
+    return true;
+  }
 
-    /**
-     * Displays the fetched child bugs in the UI.
-     * This is a new helper function extracted from fetchAndDisplayChildBugs success handler.
-     * @param {Array} childBugs - Array of child bug objects.
-     * @param {string} masterBugId - The ID of the master bug.
-     */
-    function displayChildBugs(childBugs, masterBugId) {
-        const selectedChildBugTitleElem = document.getElementById('selectedChildBugTitle');
-        const additionalVerificationDataElem = document.getElementById('additionalVerificationData');
-        selectedChildBugTitleElem.textContent = 'Click a child bug to view details';
-        additionalVerificationDataElem.value = '';
-        if (reproducibleBtn) reproducibleBtn.disabled = true;
-        if (notReproducibleBtn) notReproducibleBtn.disabled = true;
-        childBugList.innerHTML = ''; // Clear previous list when displaying
+  /**
+   * Shows a loading overlay with a spinner on a target element.
+   * The overlay covers the target element and blocks interaction.
+   * @param {HTMLElement} targetElement The element to cover with the loading overlay.
+   */
+  function showLoadingOverlay(targetElement) {
+    console.log(`Showing loading overlay for: ${targetElement.id}`);
 
-        if (childBugs && childBugs.length > 0) {
-            // Define the sorting order for statuses
-            const statusOrder = {
-                "NEW": 1, "ASSIGNED": 2, "ACCEPTED": 3, "DUPLICATE": 4,
-                "INTENDED_BEHAVIOR": 5, "FIXED": 6, "NOT_REPRODUCIBLE": 7
-                // Other statuses not listed will get a higher order (999)
-            };
+    // Ensure the target element is positioned, so the absolute overlay works correctly
+    if (window.getComputedStyle(targetElement).position === "static") {
+      targetElement.style.position = "relative";
+    }
 
-            // Mapping for Status to Material Icon
-            const statusIcons = {
-                "NEW": "fiber_new", "ASSIGNED": "person", "ACCEPTED": "task_alt",
-                "DUPLICATE": "content_copy", "INTENDED_BEHAVIOR": "info",
-                "FIXED": "check_circle", "NOT_REPRODUCIBLE": "cancel"
-            };
-            const defaultStatusIcon = "bug_report";
+    let overlay = activeLoadingOverlays.get(targetElement);
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "loading-overlay";
+      overlay.innerHTML = `
+                <div class="spinner"></div>
+            `;
+      targetElement.appendChild(overlay);
+      activeLoadingOverlays.set(targetElement, overlay);
+    }
+    overlay.classList.add("show");
+  }
 
-            // Sort the childBugs array
-            childBugs.sort((a, b) => {
-                const orderA = statusOrder[a.status] || 999;
-                const orderB = statusOrder[b.status] || 999;
+  /**
+   * Hides the loading overlay from a target element.
+   * @param {HTMLElement} targetElement The element from which to remove the loading overlay.
+   * @param {string|null} [associatedToastId=null] - Optional ID of a process toast to remove.
+   */
+  function hideLoadingOverlay(targetElement, associatedToastId = null) {
+    console.log(`Hiding loading overlay for: ${targetElement.id}`);
+    const overlay = activeLoadingOverlays.get(targetElement);
+    if (overlay) {
+      overlay.classList.remove("show");
+      // Remove from the map after fading out to allow re-showing if needed
+      overlay.addEventListener(
+        "transitionend",
+        () => {
+          if (!overlay.classList.contains("show")) {
+            // Ensure it's hidden before removing from map
+            activeLoadingOverlays.delete(targetElement);
+            if (overlay.parentNode) {
+              overlay.parentNode.removeChild(overlay);
+            }
+          }
+        },
+        { once: true }
+      );
+    }
+    if (associatedToastId) {
+      removeProcessToast(associatedToastId);
+    }
+  }
 
-                // Primary sort by defined status order
-                if (orderA !== orderB) {
-                    return orderA - orderB;
-                }
+  /**
+   * Internal variable to hold the interval ID for elapsed time updates.
+   * Declared here to be accessible within the start/stop functions via closure.
+   */
+  let _elapsedTimeIntervalId = null;
+  let _elapsedTimeStartTime = 0;
 
-                // Secondary sort: if statuses are the same (or not in explicit order), sort by ID (assuming numeric)
-                return a.id - b.id;
-            });
+  /**
+   * Starts an elapsed time updater that shows a toast with continuously updating time.
+   * @param {string} processId - A unique ID for the toast.
+   * @param {string} [baseMessage="AI is working..."] - The base message to display.
+   * @param {string} [type="info"] - The type of toast to display.
+   * @returns {string} The ID of the toast.
+   */
+  function startElapsedTimeUpdater(
+    processId,
+    baseMessage = "AI is working...",
+    type = "info"
+  ) {
+    // Clear any previously running interval
+    if (_elapsedTimeIntervalId) {
+      clearInterval(_elapsedTimeIntervalId);
+      _elapsedTimeIntervalId = null;
+    }
 
-            childBugs.forEach(bug => {
-                const bugItem = document.createElement('div');
-                bugItem.className = 'child-bug-item mdl-list__item';
-                bugItem.setAttribute('data-bug-id', bug.id);
-                const iconName = statusIcons[bug.status] || defaultStatusIcon;
-                const iconId = `status-icon-${bug.id}`;
+    // If there's an existing elapsed time toast, remove it
+    if (currentElapsedTimeToastId) {
+      removeProcessToast(currentElapsedTimeToastId);
+    }
 
-                bugItem.innerHTML = `
+    currentElapsedTimeToastId = processId;
+    _elapsedTimeStartTime = Date.now();
+
+    // Show the initial toast message
+    showToast(
+      `${baseMessage} (0.0s)`,
+      type,
+      Infinity,
+      currentElapsedTimeToastId
+    );
+
+    // Start updating the elapsed time
+    _elapsedTimeIntervalId = setInterval(() => {
+      const elapsedTime = (Date.now() - _elapsedTimeStartTime) / 1000;
+      // Update the existing toast with the new elapsed time
+      updateToast(currentElapsedTimeToastId, {
+        message: `${baseMessage} (${elapsedTime.toFixed(1)}s)`,
+      });
+    }, 100); // Update every 100ms for smoother animation
+
+    console.log(`Started elapsed time updater for process: ${processId}`);
+    return currentElapsedTimeToastId;
+  }
+
+  /**
+   * Stops the elapsed time updater and optionally removes the associated toast.
+   * @param {boolean} [removeToast=true] - Whether to remove the toast or just stop updating it.
+   * @param {Object} [finalToastOptions=null] - Optional settings for a final toast to show instead.
+   */
+  function stopElapsedTimeUpdater(
+    removeToast = true,
+    finalToastOptions = null
+  ) {
+    if (_elapsedTimeIntervalId) {
+      clearInterval(_elapsedTimeIntervalId);
+      _elapsedTimeIntervalId = null;
+      console.log("Stopped elapsed time updater.");
+    }
+
+    if (currentElapsedTimeToastId) {
+      if (removeToast) {
+        if (finalToastOptions) {
+          // Replace with final toast
+          const { message, type, duration, actions } = finalToastOptions;
+          updateToast(currentElapsedTimeToastId, {
+            message: message || "Process completed",
+            type: type || "success",
+            duration: duration || 5000,
+            actions,
+          });
+        } else {
+          // Just remove the toast
+          removeProcessToast(currentElapsedTimeToastId);
+        }
+      }
+      currentElapsedTimeToastId = null;
+    }
+
+    _elapsedTimeStartTime = 0;
+  }
+
+  /**
+   * Upgrades an MDL Textfield to ensure its label and ripple behave correctly.
+   * @param {HTMLElement} inputElement - The input element (e.g., textarea, input)
+   */
+  function upgradeMdlTextField(inputElement) {
+    if (!inputElement || !inputElement.parentNode) return;
+
+    const mdlTextfield = inputElement.closest(".mdl-textfield");
+    if (mdlTextfield) {
+      // Manually check if input has value to apply 'is-dirty'
+      if (inputElement.value && inputElement.value.trim() !== "") {
+        mdlTextfield.classList.add("is-dirty");
+      } else {
+        mdlTextfield.classList.remove("is-dirty");
+      }
+      // If the element is a textarea, ensure 'is-focused' is handled on input
+      if (inputElement.tagName === "TEXTAREA") {
+        inputElement.addEventListener("focus", () =>
+          mdlTextfield.classList.add("is-focused")
+        );
+        inputElement.addEventListener("blur", () =>
+          mdlTextfield.classList.remove("is-focused")
+        );
+      }
+    }
+  }
+
+
+  function addHotlistChip(chipText, isSuggested = false) {
+    // Initial checks (logic remains the same)
+    if (!hotlistsVisibleInput || !hotlistsHiddenInput) {
+      console.error("Hotlist input elements or hidden field not found.");
+      return;
+    }
+    // Ensure the containers are found
+    if (!selectedHotlistsContainer && !isSuggested) {
+      console.error("Selected hotlists container not found.");
+      return;
+    }
+    if (!hotlistSuggestionsContainer && isSuggested) {
+      console.error("Suggested hotlists container not found.");
+      return;
+    }
+
+    // Check if chip already exists in selectedHotlistNames (logic remains same)
+    if (selectedHotlistNames.includes(chipText)) {
+      console.log(`Hotlist "${chipText}" already added.`);
+      return;
+    }
+
+    const chip = document.createElement("div"); // Chip is now a <div> as per your HTML
+    chip.classList.add("chip"); // Base class for all chips
+
+    if (isSuggested) {
+      chip.classList.add("chip-suggestion"); // Specific class for suggested chips
+    } else {
+      chip.classList.add("chip-selected"); // Specific class for selected chips
+    }
+
+    // Add the hotlist text content directly to the div
+    chip.textContent = chipText;
+
+    if (!isSuggested) { // Only add the delete span for selected chips
+      const deleteSpan = document.createElement("span");
+      deleteSpan.classList.add("chip-delete"); // Class for the delete icon span
+      deleteSpan.innerHTML = "&times;"; // Use HTML entity for the 'x'
+      chip.appendChild(deleteSpan);
+
+      // Add click listener for the delete span to remove the chip
+      deleteSpan.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent event bubbling to the chip parent if it also had a listener
+        chip.remove();
+        selectedHotlistNames = selectedHotlistNames.filter((name) => name !== chipText);
+        updateHotlistsHiddenInput();
+        hotlistsVisibleInput.focus(); // Keep focus on the input field
+      });
+    }
+
+    // Append chips to the correct container
+    if (isSuggested) {
+      hotlistSuggestionsContainer.appendChild(chip); // Append to suggested container
+      // Add click listener for suggested chips to move them to selected
+      chip.addEventListener("click", () => {
+        addHotlistChip(chipText, false); // Add as a selected chip
+        chip.remove(); // Remove from suggestions after selection
+        hotlistsVisibleInput.value = ""; // Clear input after selection
+        updateHotlistsHiddenInput(); // Update hidden input
+      });
+    } else {
+      selectedHotlistsContainer.appendChild(chip); // Append to selected container
+      selectedHotlistNames.push(chipText); // Add to selected list
+      updateHotlistsHiddenInput(); // Update hidden input
+    }
+  }
+
+  /**
+   * Updates the hidden input field with a comma-separated list of selected hotlist names.
+   */
+  function updateHotlistsHiddenInput() {
+    if (hotlistsHiddenInput) {
+      hotlistsHiddenInput.value = selectedHotlistNames.join(",");
+    }
+  }
+
+  /**
+   * Updates the token and cost display in the header.
+   * @param {number} tokens - The number of tokens to add to the total.
+   * @param {number} cost - The cost to add to the total.
+   */
+  function updateTokenAndCost(tokens, cost) {
+    currentSessionTokens += tokens;
+    currentSessionCost += cost;
+
+    if (tokensUsedSpan) {
+      tokensUsedSpan.textContent = currentSessionTokens;
+    }
+    if (costUsedSpan) {
+      costUsedSpan.textContent = currentSessionCost.toFixed(2); // Format to 2 decimal places
+    }
+  }
+
+  /**
+   * Fetches suggested hotlists based on component and device type.
+   * @param {string} component - The selected component.
+   * @param {string} deviceType - The selected device type.
+   * @param {string} applicationType - The selected application type.
+   */
+  function fetchSuggestedHotlists(component, deviceType, applicationType) {
+    console.log(
+      `[CLIENT] fetchSuggestedHotlists called with: comp=${component}, device=${deviceType}, app=${applicationType}`
+    );
+
+    if (hotlistSuggestionsContainer) { // Use the new consistent variable name
+      hotlistSuggestionsContainer.innerHTML = ''; // Clear the container
+    }
+
+    // Defensive check: Re-get the container if the global variable is null.
+    // This handles cases where the function might be called before DOMContentLoaded finishes
+    // setting the global variable, or if the element was removed/re-added.
+    if (!hotlistChipsContainer) {
+      hotlistChipsContainer = document.getElementById("hotlistChipsContainer");
+      if (!hotlistChipsContainer) {
+        console.error(
+          "[CLIENT] hotlistChipsContainer still not found after re-attempt. Cannot proceed with hotlist suggestions."
+        );
+        return;
+      }
+    }
+
+    google.script.run
+      .withSuccessHandler((suggestedHotlists) => {
+        console.log(
+          "[CLIENT] Server returned suggested hotlists:",
+          suggestedHotlists
+        );
+        hotlistChipsContainer.innerHTML = ""; // Clear previous suggestions
+        if (suggestedHotlists && suggestedHotlists.length > 0) {
+          suggestedHotlists.forEach((hotlist) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "hotlist-chip-suggestion-wrapper";
+            const chip = document.createElement("span");
+            chip.className = "chip chip-selected";
+            chip.textContent = hotlist;
+            chip.title = `Click to add ${hotlist}`;
+            chip.addEventListener("click", () => addHotlistChip(hotlist));
+            wrapper.appendChild(chip);
+            hotlistChipsContainer.appendChild(wrapper);
+          });
+        } else {
+          hotlistChipsContainer.innerHTML =
+            '<span class="status-message status-info">No hotlist suggestions for this combination.</span>';
+          console.log("[CLIENT] No hotlist suggestions found or returned.");
+        }
+      })
+      .withFailureHandler((error) => {
+        console.error("[CLIENT] Error fetching hotlist suggestions:", error);
+        showToast(
+          "Error fetching hotlist suggestions.",
+          "error",
+          10000,
+          "hotlistSuggestError"
+        );
+      })
+      .fetchHotlistSuggestions(component, deviceType, applicationType);
+  }
+
+  /**
+   * Displays the fetched child bugs in the UI.
+   * This is a new helper function extracted from fetchAndDisplayChildBugs success handler.
+   * @param {Array} childBugs - Array of child bug objects.
+   * @param {string} masterBugId - The ID of the master bug.
+   */
+  function displayChildBugs(childBugs, masterBugId) {
+    const selectedChildBugTitleElem = document.getElementById(
+      "selectedChildBugTitle"
+    );
+    const additionalVerificationDataElem = document.getElementById(
+      "additionalVerificationData"
+    );
+    selectedChildBugTitleElem.textContent = "Click a child bug to view details";
+    additionalVerificationDataElem.value = "";
+    if (reproducibleBtn) reproducibleBtn.disabled = true;
+    if (notReproducibleBtn) notReproducibleBtn.disabled = true;
+    childBugList.innerHTML = ""; // Clear previous list when displaying
+
+    if (childBugs && childBugs.length > 0) {
+      // Define the sorting order for statuses
+      const statusOrder = {
+        NEW: 1,
+        ASSIGNED: 2,
+        ACCEPTED: 3,
+        DUPLICATE: 4,
+        INTENDED_BEHAVIOR: 5,
+        FIXED: 6,
+        NOT_REPRODUCIBLE: 7,
+        // Other statuses not listed will get a higher order (999)
+      };
+
+      // Mapping for Status to Material Icon
+      const statusIcons = {
+        NEW: "fiber_new",
+        ASSIGNED: "person",
+        ACCEPTED: "task_alt",
+        DUPLICATE: "content_copy",
+        INTENDED_BEHAVIOR: "info",
+        FIXED: "check_circle",
+        NOT_REPRODUCIBLE: "cancel",
+      };
+      const defaultStatusIcon = "bug_report";
+
+      // Sort the childBugs array
+      childBugs.sort((a, b) => {
+        const orderA = statusOrder[a.status] || 999;
+        const orderB = statusOrder[b.status] || 999;
+
+        // Primary sort by defined status order
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        // Secondary sort: if statuses are the same (or not in explicit order), sort by ID (assuming numeric)
+        return a.id - b.id;
+      });
+
+      childBugs.forEach((bug) => {
+        const bugItem = document.createElement("div");
+        bugItem.className = "child-bug-item mdl-list__item";
+        bugItem.setAttribute("data-bug-id", bug.id);
+        const iconName = statusIcons[bug.status] || defaultStatusIcon;
+        const iconId = `status-icon-${bug.id}`;
+
+        bugItem.innerHTML = `
                     <span class="mdl-list__item-primary-content" style="display: flex; align-items: center;">
                         <!-- Platform/App Indicator: 'P' for Platform (green), 'A' for App (red) -->
-                        <span class="mdl-list__item-icon" style="font-weight: bold; font-size: 1.2em; background: ${bug.isPlatform ? 'green' : 'red'}; margin-right: 4px;padding:3px;" title="${bug.isPlatform ? 'Platform Bug' : 'App Bug'}">
-                            ${bug.isPlatform ? 'P' : 'A'}
+                        <span class="mdl-list__item-icon" style="font-weight: bold; font-size: 1.2em; background: ${
+                          bug.isPlatform ? "green" : "red"
+                        }; margin-right: 4px;padding:3px;" title="${
+          bug.isPlatform ? "Platform Bug" : "App Bug"
+        }">
+                            ${bug.isPlatform ? "P" : "A"}
                         </span>
-                        <span style="font-size: 0.75em;">${bug.id}: ${bug.title}</span>
+                        <span style="font-size: 0.75em;">${bug.id}: ${
+          bug.title
+        }</span>
                     </span>
                     <span class="mdl-list__item-secondary-content" style="display: flex; align-items: center;">
-                        ${bug.status ? `<i class="material-icons status-icon" title="${bug.status}">${iconName}</i>` : ''}
-                        ${bug.bugType ? `
+                        ${
+                          bug.status
+                            ? `<i class="material-icons status-icon" title="${bug.status}">${iconName}</i>`
+                            : ""
+                        }
+                        ${
+                          bug.bugType
+                            ? `
                             <span class="mdl-chip" style="margin-left: 6px;">
-                                <span class="mdl-chip__text" style="font-size: 0.9em; font-weight: bold; color: ${bug.bugType === 'feature_request' ? 'green' : 'red'};">
-                                    ${bug.bugType === 'feature_request' ? 'FR' : 'Bug'}
+                                <span class="mdl-chip__text" style="font-size: 0.9em; font-weight: bold; color: ${
+                                  bug.bugType === "feature_request"
+                                    ? "green"
+                                    : "red"
+                                };">
+                                    ${
+                                      bug.bugType === "feature_request"
+                                        ? "FR"
+                                        : "Bug"
+                                    }
                                 </span>
                             </span>
-                        ` : ''}
+                        `
+                            : ""
+                        }
                     </span>
                 `;
 
-                bugItem.addEventListener('click', () => {
-                    // Remove 'is-active' from all items
-                    document.querySelectorAll('.child-bug-item').forEach(item => {
-                        item.classList.remove('is-active');
-                    });
-                    // Add 'is-active' to the clicked item
-                    bugItem.classList.add('is-active');
-                    showToast(`Selected Bug ${bug.id}`, 'info');
+        bugItem.addEventListener("click", () => {
+          // Remove 'is-active' from all items
+          document.querySelectorAll(".child-bug-item").forEach((item) => {
+            item.classList.remove("is-active");
+          });
+          // Add 'is-active' to the clicked item
+          bugItem.classList.add("is-active");
+          showToast(`Selected Bug ${bug.id}`, "info");
 
-                    // Determine the bug type chip text and class
-                    const bugTypeChipText = bug.isPlatform ? 'Platform Bug' : 'App Bug';
-                    const bugTypeChipClass = bug.isPlatform ? 'mdl-color--red-300' : 'mdl-color--light-blue-300'; // Example colors
+          // Determine the bug type chip text and class
+          const bugTypeChipText = bug.isPlatform ? "Platform Bug" : "App Bug";
+          const bugTypeChipClass = bug.isPlatform
+            ? "mdl-color--red-300"
+            : "mdl-color--light-blue-300"; // Example colors
 
-
-                    selectedChildBugTitleElem.innerHTML = `
+          selectedChildBugTitleElem.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px; width: 100%">
-                            <i id="${iconId}" class="material-icons mdl-list__item-icon status-icon" title="${bug.status}">${iconName}</i>
+                            <i id="${iconId}" class="material-icons mdl-list__item-icon status-icon" title="${
+            bug.status
+          }">${iconName}</i>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%">
-                                ${bug.componentPath && Array.isArray(bug.componentPath) && bug.componentPath.length > 0 ? `
+                                ${
+                                  bug.componentPath &&
+                                  Array.isArray(bug.componentPath) &&
+                                  bug.componentPath.length > 0
+                                    ? `
                                     <span class="mdl-chip">
-                                        <span class="mdl-chip__text" style="font-size: 1em;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 200px;">${bug.componentPath.join(' > ')}</span>
+                                        <span class="mdl-chip__text" style="font-size: 1em;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 200px;">${bug.componentPath.join(
+                                          " > "
+                                        )}</span>
                                     </span>
-                                ` : ''}
-                                ${bug.bugType ? `
+                                `
+                                    : ""
+                                }
+                                ${
+                                  bug.bugType
+                                    ? `
                             <span class="mdl-chip" style="margin-left: 6px;">
-                                <span class="mdl-chip__text" style="font-size: 0.9em; font-weight: bold; color: ${bug.bugType === 'feature_request' ? 'green' : 'red'};">
-                                    ${bug.bugType === 'feature_request' ? 'FR' : 'Bug'}
+                                <span class="mdl-chip__text" style="font-size: 0.9em; font-weight: bold; color: ${
+                                  bug.bugType === "feature_request"
+                                    ? "green"
+                                    : "red"
+                                };">
+                                    ${
+                                      bug.bugType === "feature_request"
+                                        ? "FR"
+                                        : "Bug"
+                                    }
                                 </span>
                             </span>
-                        ` : ''}
+                        `
+                                    : ""
+                                }
 
                                 <span class="mdl-chip ${bugTypeChipClass}">
                                     <span class="mdl-chip__text" style="font-size: 1em;">${bugTypeChipText}</span>
@@ -718,126 +1097,169 @@
                             <div class="mdl-tooltip" data-mdl-for="${iconId}">
                                 ${bug.status}
                             </div>
-                            <a href="https://b.corp.google.com/issues/${bug.id}" target="_blank" class="bug-title-link" style="font-weight: bold; font-size: 1.1em;">${bug.title}</a>
+                            <a href="https://b.corp.google.com/issues/${
+                              bug.id
+                            }" target="_blank" class="bug-title-link" style="font-weight: bold; font-size: 1.1em;">${
+            bug.title
+          }</a>
                         </div>
                     `;
 
-                    // IMPORTANT: After setting innerHTML, you must upgrade the dynamically added MDL tooltip element.
-                    // This tells MDL to process and enable the tooltip's functionality.
-                    if (window.componentHandler) {
-                        const tooltipElement = selectedChildBugTitleElem.querySelector(`.mdl-tooltip[data-mdl-for="${iconId}"]`);
-                        if (tooltipElement) {
-                            window.componentHandler.upgradeElement(tooltipElement);
-                        }
-                    }
-                    
-                    additionalVerificationDataElem.value = '';
+          additionalVerificationDataElem.value = "";
 
-                    // Populate AI Summary (with caching)
-                    if (aiSummaryCache.has(bug.id)) {
-                        // Apply formatting when retrieving from cache 
-                        aiSummaryDisplay.innerHTML = aiSummaryCache.get(bug.id).replace(/\n/g, '<br>');
-                    } else {
-                        aiSummaryDisplay.textContent = 'Generating AI Summary...';
+          // Populate AI Summary (with caching)
+          if (aiSummaryCache.has(bug.id)) {
+            // Apply formatting when retrieving from cache
+            aiSummaryDisplay.innerHTML = aiSummaryCache
+              .get(bug.id)
+              .replace(/\n/g, "<br>");
+          } else {
+            aiSummaryDisplay.textContent = "Generating AI Summary...";
 
-                        google.script.run
-                            .withSuccessHandler(result => {
-                                // Access the summary property from the returned object
-                                if (result && result.summary) {
-                                    aiSummaryCache.set(bug.id, result.summary);
-                                    updateTokenAndCost(result.tokens, result.cost);
-                                    aiSummaryDisplay.innerHTML = result.summary.replace(/\n/g, '<br>');
-                                } else {
-                                    // Handle cases where summary might be missing from the result object
-                                    aiSummaryDisplay.textContent = 'Failed to generate AI Summary: Unexpected response.';
-                                    showToast('Error generating AI Summary: Unexpected response.', 'error');
-                                }
-                            })
-                            .withFailureHandler(error => {
-                                console.error("Error generating AI Summary:", error);
-                                aiSummaryDisplay.textContent = 'Failed to generate AI Summary.';
-                                showToast('Error generating AI Summary: Unexpected response.', 'error', 10000, 'aiSummaryResponseError');                     
-                            })
-                            .generateAISummary(bug.contents);
-                    }
+            google.script.run
+              .withSuccessHandler((result) => {
+                // Access the summary property from the returned object
+                if (result && result.summary) {
+                  aiSummaryCache.set(bug.id, result.summary);
+                  updateTokenAndCost(result.tokens, result.cost);
+                  aiSummaryDisplay.innerHTML = result.summary.replace(
+                    /\n/g,
+                    "<br>"
+                  );
+                } else {
+                  // Handle cases where summary might be missing from the result object
+                  aiSummaryDisplay.textContent =
+                    "Failed to generate AI Summary: Unexpected response.";
+                  showToast(
+                    "Error generating AI Summary: Unexpected response.",
+                    "error"
+                  );
+                }
+              })
+              .withFailureHandler((error) => {
+                console.error("Error generating AI Summary:", error);
+                aiSummaryDisplay.textContent = "Failed to generate AI Summary.";
+                showToast(
+                  "Error generating AI Summary: Unexpected response.",
+                  "error",
+                  10000,
+                  "aiSummaryResponseError"
+                );
+              })
+              .generateAISummary(bug.contents);
+          }
 
-                    // --- FIX: Populate the accordion body with bug contents, handling string or array ---
-                    if (bug.contents) {
-                        let contentToProcess = bug.contents;
-                        // If bug.contents is a single string, convert it to an array for consistent processing
-                        if (typeof bug.contents === 'string') {
-                            contentToProcess = [bug.contents];
-                        }
+          // --- FIX: Populate the accordion body with bug contents, handling string or array ---
+          if (bug.contents) {
+            let contentToProcess = bug.contents;
+            // If bug.contents is a single string, convert it to an array for consistent processing
+            if (typeof bug.contents === "string") {
+              contentToProcess = [bug.contents];
+            }
 
-                        if (Array.isArray(contentToProcess) && contentToProcess.length > 0) {
-                            bugContentsAccordionBody.innerHTML = contentToProcess
-                                .map(line => {
-                                    // Replace newlines within each string with <br>
-                                    const processedLine = line.replace(/\n/g, '<br>');
-                                    // Wrap each processed line in a div for segmenting
-                                    return `<div class="bug-content-segment">${processedLine}</div>`;
-                                })
-                                .join(''); // Join the array of div strings without any additional separator
-                        } else {
-                            bugContentsAccordionBody.innerHTML = '<span style="font-style: italic;">No detailed description available.</span>';
-                        }
-                    } else {
-                        bugContentsAccordionBody.innerHTML = '<span style="font-style: italic;">No detailed description available.</span>';
-                    }
-                    // --- END FIX ---
+            if (
+              Array.isArray(contentToProcess) &&
+              contentToProcess.length > 0
+            ) {
+              bugContentsAccordionBody.innerHTML = contentToProcess
+                .map((line) => {
+                  // Replace newlines within each string with <br>
+                  const processedLine = line.replace(/\n/g, "<br>");
+                  // Wrap each processed line in a div for segmenting
+                  return `<div class="bug-content-segment">${processedLine}</div>`;
+                })
+                .join(""); // Join the array of div strings without any additional separator
+            } else {
+              bugContentsAccordionBody.innerHTML =
+                '<span style="font-style: italic;">No detailed description available.</span>';
+            }
+          } else {
+            bugContentsAccordionBody.innerHTML =
+              '<span style="font-style: italic;">No detailed description available.</span>';
+          }
+          // --- END FIX ---
 
-                    // Enable the "Reproducible" and "Not Reproducible" buttons (using global variables)
-                    if (reproducibleBtn) reproducibleBtn.disabled = false;
-                    if (notReproducibleBtn) notReproducibleBtn.disabled = false;
-                });
-                childBugList.appendChild(bugItem);
-            });
-            showToast(`Found ${childBugs.length} child bug(s).`, 'success');
-        } else {
-            showToast('No child bugs found for this ID.', 'info');
-        }
+          // Enable the "Reproducible" and "Not Reproducible" buttons (using global variables)
+          if (reproducibleBtn) reproducibleBtn.disabled = false;
+          if (notReproducibleBtn) notReproducibleBtn.disabled = false;
+        });
+        childBugList.appendChild(bugItem);
+      });
+      showToast(`Found ${childBugs.length} child bug(s).`, "success");
+    } else {
+      showToast("No child bugs found for this ID.", "info");
     }
+  }
 
   /**
- * Gathers data from the form fields for bug description generation.
- * @returns {object|null} An object containing form data, or null if essential fields are missing.
- */
-function getFormDataForGeneration() {
-    const commandInput = document.getElementById('command');
-    const bugTypeSelect = document.getElementById('bugType');
-    const deviceTypeSelect = document.getElementById('deviceType');
-    const deviceModeSelect = document.getElementById('deviceMode');
-    const applicationTypeSelect = document.getElementById('applicationType');
-    const prioritySelect = document.getElementById('priority');
-    const componentSelect = document.getElementById('component');
-    const deviceDetailsTextArea = document.getElementById('deviceDetails');
+   * Gathers data from the form fields for bug description generation.
+   * @returns {object|null} An object containing form data, or null if essential fields are missing.
+   */
+  function getFormDataForGeneration() {
+    const commandInput = document.getElementById("command");
+    const bugTypeSelect = document.getElementById("bugType");
+    const deviceTypeSelect = document.getElementById("deviceType");
+    const deviceModeSelect = document.getElementById("deviceMode");
+    const applicationTypeSelect = document.getElementById("applicationType");
+    const prioritySelect = document.getElementById("priority");
+    const componentSelect = document.getElementById("component");
+    const deviceDetailsTextArea = document.getElementById("deviceDetails");
 
     // Basic validation: Check if essential elements exist
-    if (!commandInput || !bugTypeSelect || !deviceTypeSelect || !deviceModeSelect || !applicationTypeSelect || !prioritySelect || !componentSelect || !deviceDetailsTextArea) {
-        showToast("Internal Error: Form elements not fully initialized.", 'error', 10000, 'formInitError');        console.error("getFormDataForGeneration: Missing required DOM elements.");
-        return null;
+    if (
+      !commandInput ||
+      !bugTypeSelect ||
+      !deviceTypeSelect ||
+      !deviceModeSelect ||
+      !applicationTypeSelect ||
+      !prioritySelect ||
+      !componentSelect ||
+      !deviceDetailsTextArea
+    ) {
+      showToast(
+        "Internal Error: Form elements not fully initialized.",
+        "error",
+        10000,
+        "formInitError"
+      );
+      console.error("getFormDataForGeneration: Missing required DOM elements.");
+      return null;
     }
 
     const formData = {
-        command: commandInput.value.trim(),
-        bugType: bugTypeSelect.value,
-        deviceType: deviceTypeSelect.value,
-        deviceMode: deviceModeSelect.value,
-        applicationType: applicationTypeSelect.value,
-        priority: prioritySelect.value,
-        component: componentSelect.value,
-        deviceDetails: deviceDetailsTextArea.value.trim(),
-        selectedHotlists: selectedHotlistNames
+      command: commandInput.value.trim(),
+      bugType: bugTypeSelect.value,
+      deviceType: deviceTypeSelect.value,
+      deviceMode: deviceModeSelect.value,
+      applicationType: applicationTypeSelect.value,
+      priority: prioritySelect.value,
+      component: componentSelect.value,
+      deviceDetails: deviceDetailsTextArea.value.trim(),
+      selectedHotlists: selectedHotlistNames,
     };
 
     // More robust validation
     if (!formData.command) {
-        showToast("Please enter a command/summary for the bug.", 'error', 10000, 'commandRequired');        commandInput.closest('.mdl-textfield').classList.add('is-invalid');
-        return null;
+      showToast(
+        "Please enter a command/summary for the bug.",
+        "error",
+        10000,
+        "commandRequired"
+      );
+      commandInput.closest(".mdl-textfield").classList.add("is-invalid");
+      return null;
     }
     if (!formData.deviceDetails) {
-        showToast("Device details cannot be empty.", 'error', 10000, 'deviceDetailsRequired');        deviceDetailsTextArea.closest('.mdl-textfield').classList.add('is-invalid');
-        return null;
+      showToast(
+        "Device details cannot be empty.",
+        "error",
+        10000,
+        "deviceDetailsRequired"
+      );
+      deviceDetailsTextArea
+        .closest(".mdl-textfield")
+        .classList.add("is-invalid");
+      return null;
     }
 
     // You might want to add more specific validation based on your requirements
@@ -845,789 +1267,942 @@ function getFormDataForGeneration() {
 
     console.log("Collected form data for generation:", formData);
     return formData;
-}
+  }
 
-    /**
-     * Handles the successful response from the generateBugDescription server-side function.
-     * @param {object} response - The response object from the server.
-     */
-    function handleGenerationResponse(response) {
-        generateBtn.disabled = false; // Re-enable generate button
-        console.log('[HandleGenerationResponse] Response: ', response);
-        console.log('[HGR] generatedTitleDisplay', generatedTitleDisplay);
-        console.log('[HGR] editableBugDescription', editableBugDescription);
-        if (response && response.title && response.body) {
-            generatedTitle = response.title;
-            generatedBody = response.body;
-    
-            if (generatedTitleDisplay) {
-                generatedTitleDisplay.value = generatedTitle;
-                upgradeMdlTextField(generatedTitleDisplay); // Ensure MDL label lifts
-            }
-            if (editableBugDescription) {
-                animateTextDisplay(editableBugDescription, generatedBody);
-                upgradeMdlTextField(editableBugDescription); // Ensure MDL label lifts
-            }
-    
-            reportBtn.disabled = false; // Enable report button only on successful generation
-            stopElapsedTimeUpdater();
-            showToast("Bug description generated successfully!", 'success', 5000);
-            updateTokenAndCost(response.tokens, response.cost);
-        } else {
-            const errorMessage = response.errorDetails || "Unknown error during generation.";
-            stopElapsedTimeUpdater();
-            showToast(`Generation failed: ${errorMessage}`, 'error', 10000, 'generationError');
-            animateTextDisplay(editableBugDescription, errorMessage);
-            upgradeMdlTextField(editableBugDescription);
-            reportBtn.disabled = true;
-            updateTokenAndCost(response.tokens, response.cost);
-        }
-    }
+  /**
+   * Handles the successful response from the generateBugDescription server-side function.
+   * @param {object} response - The response object from the server.
+   */
+  function handleGenerationResponse(response) {
+    generateBtn.disabled = false; // Re-enable generate button
+    console.log("[HandleGenerationResponse] Response: ", response);
+    console.log("[HGR] generatedTitleDisplay", generatedTitleDisplay);
+    console.log("[HGR] editableBugDescription", editableBugDescription);
+    if (response && response.title && response.body) {
+      generatedTitle = response.title;
+      generatedBody = response.body;
 
-    /**
-     * Triggers the generation of a bug one-pager document using the library function.
-     * This function reads bug IDs and the target document URL from dedicated input fields.
-     */
-    function triggerOnePagerGeneration() {
-        const bugIdsString = extractedBugIdsDisplay.value.trim();
-        const appNameString = appNameInput.value.trim();
-        const appPackageNameString = appPackageNameInput.value.trim();
-        const appVersionString = appVersionInput.value.trim();
-        const deviceNameString = deviceNameInput.value.trim();
-        const deviceOsVersionString = deviceOsVersionInput.value.trim();
-        const summaryOfTestingString = summaryOfTestingInput.value.trim();
-        const priorityChromeOSAppBugsString = priorityChromeOsAppBugsInput.value.trim();
-        const pixelTabletAppBugsString = pixelTabletAppBugsInput.value.trim();
-        const chromeOSFeatureRequestsString = chromeOsFeatureRequestsInput.value.trim()
-
-        const targetDocUrl = onePagerDocUrlInput.value.trim();
-        console.log({bugIdsString, targetDocUrl});
-        if (!bugIdsString) {
-            showToast('Please enter at least one Bug ID for the one-pager.', 'error');
-            onePagerBugIdsInput.closest('.mdl-textfield').classList.add('is-invalid');
-            return;
-        }
-        if (!targetDocUrl) {
-            showToast('Please enter the Target Google Document URL for the one-pager.', 'error');
-            onePagerDocUrlInput.closest('.mdl-textfield').classList.add('is-invalid');
-            return;
-        }
-
-        // Indicate loading state
-        showToast('Generating one-pager...', 'info', Infinity, 'onePagerProcess'); // Persistent toast
-        triggerOnePagerBtn.disabled = true; // Disable button while processing
-        triggerOnePagerBtn.disabled = true; // Disable button while processing
-
-        // Call the library function!
-        google.script.run
-            .withSuccessHandler(result => {
-                if (result.status === 'success') {
-                    removeProcessToast('onePagerProcess'); // Remove persistent toast
-                    showToast(`One-pager generated successfully! ${result.message}`, 'success', 3000);
-                    onePagerBugIdsInput.value = '';
-                    onePagerDocUrlInput.value = targetDocUrl;
-                    upgradeMdlTextField(onePagerBugIdsInput);
-                    upgradeMdlTextField(onePagerDocUrlInput);
-                    window.open(targetDocUrl, "_blank");
-                } else {
-                    removeProcessToast('onePagerProcess');
-                    showToast(`Failed to generate one-pager: ${result.message}`, 'error', null);
-                }
-                triggerOnePagerBtn.disabled = false; // Re-enable button
-            })
-            .withFailureHandler(error => {
-                console.error("Error generating one-pager:", error);
-                removeProcessToast('onePagerProcess'); // Remove persistent toast
-                showToast(`Error generating one-pager: ${error.message || error}`, 'error', 10000, 'onePagerError');
-                triggerOnePagerBtn.disabled = false; // Re-enable button
-            })
-            .generateOnePagerDocWrapper({
-              bugIdsString, 
-              appPackageNameString,
-              appNameString, 
-              appPackageNameString,
-              appVersionString, 
-              deviceNameString, 
-              deviceOsVersionString, 
-              summaryOfTestingString, 
-              priorityChromeOSAppBugsString, 
-              pixelTabletAppBugsString, 
-              chromeOSFeatureRequestsString,
-              targetDocUrl
-            });
-    }
-    
-      /**
-       * Fetches and displays child bugs for the currently selected bug.
-       */
-      function fetchAndDisplayChildBugs() {
-          const bugId = bugIdInput ? bugIdInput.value.trim() : '';
-  
-          if (!bugId) {
-              showToast("Please enter the master bug ID first", "info", 3000);
-              return;
-          }
-  
-          showLoadingOverlay(childBugListSection);
-          childBugList.innerHTML = ''; // Clear previous list immediately
-  
-          // First, fetch the count of child bugs to give a more accurate message
-          // This initial toast will be replaced by the elapsed time updater if bugs are found
-          showToast("Counting child bugs...", "info", Infinity, 'fetchChildBugsProcess');
-  
-          google.script.run
-              .withSuccessHandler(childBugCount => {
-                  if (childBugCount > 0) {
-                      // Start tracking elapsed time for bug fetching
-                      startElapsedTimeUpdater('fetchChildBugsProcess'); // This will manage the toast updates
-  
-                      // Now, fetch the actual bug details
-                      google.script.run
-                          .withSuccessHandler(childBugs => {
-                              stopElapsedTimeUpdater(); // Stop and remove the elapsed time toast
-                              displayChildBugs(childBugs, bugId);
-                              hideLoadingOverlay(childBugListSection);
-                              showToast(`Found ${childBugs.length} child bug(s).`, 'success', 3000); // Transient success toast
-                          })
-                          .withFailureHandler(error => {
-                              stopElapsedTimeUpdater(); // Stop and remove the elapsed time toast
-                              console.error("Error fetching child bugs:", error);
-                              // Pass the toast ID to hideLoadingOverlay to remove the associated process toast
-                              hideLoadingOverlay(childBugListSection, 'fetchChildBugsProcess');
-                              showToast("Error fetching child bugs.", 'error', null); // Persistent error toast
-                          })
-                          .fetchChildBugDetailsWithCount(bugId);
-                  } else {
-                      removeProcessToast('fetchChildBugsProcess'); // Remove the "Counting child bugs" toast
-                      showToast('No child bugs found for this ID.', 'info', 3000);
-                      hideLoadingOverlay(childBugListSection);
-                  }
-              })
-              .withFailureHandler(error => {
-                  // If count fails, no elapsed time toast would have started, but ensure 'Counting' toast is removed
-                  removeProcessToast('fetchChildBugsProcess');
-                  console.error("Error determining child bug count:", error);
-                  showToast("Error determining child bug count.", 'error', null); // Persistent error toast
-                  hideLoadingOverlay(childBugListSection);
-              })
-              .fetchChildBugCount(bugId);
+      if (generatedTitleDisplay) {
+        generatedTitleDisplay.value = generatedTitle;
+        upgradeMdlTextField(generatedTitleDisplay); // Ensure MDL label lifts
+      }
+      if (editableBugDescription) {
+        animateTextDisplay(editableBugDescription, generatedBody);
+        upgradeMdlTextField(editableBugDescription); // Ensure MDL label lifts
       }
 
+      reportBtn.disabled = false; // Enable report button only on successful generation
+      stopElapsedTimeUpdater();
+      showToast("Bug description generated successfully!", "success", 5000);
+      updateTokenAndCost(response.tokens, response.cost);
+    } else {
+      const errorMessage =
+        response.errorDetails || "Unknown error during generation.";
+      stopElapsedTimeUpdater();
+      showToast(
+        `Generation failed: ${errorMessage}`,
+        "error",
+        10000,
+        "generationError"
+      );
+      animateTextDisplay(editableBugDescription, errorMessage);
+      upgradeMdlTextField(editableBugDescription);
+      reportBtn.disabled = true;
+      updateTokenAndCost(response.tokens, response.cost);
+    }
+  }
+
+  /**
+   * Triggers the generation of a bug one-pager document using the library function.
+   * This function reads bug IDs and the target document URL from dedicated input fields.
+   */
+  function triggerOnePagerGeneration() {
+    const bugIdsString = extractedBugIdsDisplay.value.trim();
+    const appNameString = appNameInput.value.trim();
+    const appPackageNameString = appPackageNameInput.value.trim();
+    const appVersionString = appVersionInput.value.trim();
+    const deviceNameString = deviceNameInput.value.trim();
+    const deviceOsVersionString = deviceOsVersionInput.value.trim();
+    const summaryOfTestingString = summaryOfTestingInput.value.trim();
+    const priorityChromeOSAppBugsString =
+      priorityChromeOsAppBugsInput.value.trim();
+    const pixelTabletAppBugsString = pixelTabletAppBugsInput.value.trim();
+    const chromeOSFeatureRequestsString =
+      chromeOsFeatureRequestsInput.value.trim();
+
+    const targetDocUrl = onePagerDocUrlInput.value.trim();
+    console.log({ bugIdsString, targetDocUrl });
+    if (!bugIdsString) {
+      showToast("Please enter at least one Bug ID for the one-pager.", "error");
+      onePagerBugIdsInput.closest(".mdl-textfield").classList.add("is-invalid");
+      return;
+    }
+    if (!targetDocUrl) {
+      showToast(
+        "Please enter the Target Google Document URL for the one-pager.",
+        "error"
+      );
+      onePagerDocUrlInput.closest(".mdl-textfield").classList.add("is-invalid");
+      return;
+    }
+
+    // Indicate loading state
+    showToast("Generating one-pager...", "info", Infinity, "onePagerProcess"); // Persistent toast
+    triggerOnePagerBtn.disabled = true; // Disable button while processing
+    triggerOnePagerBtn.disabled = true; // Disable button while processing
+
+    // Call the library function!
+    google.script.run
+      .withSuccessHandler((result) => {
+        if (result.status === "success") {
+          removeProcessToast("onePagerProcess"); // Remove persistent toast
+          showToast(
+            `One-pager generated successfully! ${result.message}`,
+            "success",
+            3000
+          );
+          onePagerBugIdsInput.value = "";
+          onePagerDocUrlInput.value = targetDocUrl;
+          upgradeMdlTextField(onePagerBugIdsInput);
+          upgradeMdlTextField(onePagerDocUrlInput);
+          window.open(targetDocUrl, "_blank");
+        } else {
+          removeProcessToast("onePagerProcess");
+          showToast(
+            `Failed to generate one-pager: ${result.message}`,
+            "error",
+            null
+          );
+        }
+        triggerOnePagerBtn.disabled = false; // Re-enable button
+      })
+      .withFailureHandler((error) => {
+        console.error("Error generating one-pager:", error);
+        removeProcessToast("onePagerProcess"); // Remove persistent toast
+        showToast(
+          `Error generating one-pager: ${error.message || error}`,
+          "error",
+          10000,
+          "onePagerError"
+        );
+        triggerOnePagerBtn.disabled = false; // Re-enable button
+      })
+      .generateOnePagerDocWrapper({
+        bugIdsString,
+        appPackageNameString,
+        appNameString,
+        appPackageNameString,
+        appVersionString,
+        deviceNameString,
+        deviceOsVersionString,
+        summaryOfTestingString,
+        priorityChromeOSAppBugsString,
+        pixelTabletAppBugsString,
+        chromeOSFeatureRequestsString,
+        targetDocUrl,
+      });
+  }
+
+  /**
+   * Fetches and displays child bugs for the currently selected bug.
+   */
+  function fetchAndDisplayChildBugs() {
+    const bugId = bugIdInput ? bugIdInput.value.trim() : "";
+
+    if (!bugId) {
+      showToast("Please enter the master bug ID first", "info", 3000);
+      return;
+    }
+
+    showLoadingOverlay(childBugListSection);
+    childBugList.innerHTML = ""; // Clear previous list immediately
+
+    // First, fetch the count of child bugs to give a more accurate message
+    // This initial toast will be replaced by the elapsed time updater if bugs are found
+    showToast(
+      "Counting child bugs...",
+      "info",
+      Infinity,
+      "fetchChildBugsProcess"
+    );
+
+    google.script.run
+      .withSuccessHandler((childBugCount) => {
+        if (childBugCount > 0) {
+          // Start tracking elapsed time for bug fetching
+          startElapsedTimeUpdater("fetchChildBugsProcess"); // This will manage the toast updates
+
+          // Now, fetch the actual bug details
+          google.script.run
+            .withSuccessHandler((childBugs) => {
+              stopElapsedTimeUpdater(); // Stop and remove the elapsed time toast
+              displayChildBugs(childBugs, bugId);
+              hideLoadingOverlay(childBugListSection);
+              showToast(
+                `Found ${childBugs.length} child bug(s).`,
+                "success",
+                3000
+              ); // Transient success toast
+            })
+            .withFailureHandler((error) => {
+              stopElapsedTimeUpdater(); // Stop and remove the elapsed time toast
+              console.error("Error fetching child bugs:", error);
+              // Pass the toast ID to hideLoadingOverlay to remove the associated process toast
+              hideLoadingOverlay(childBugListSection, "fetchChildBugsProcess");
+              showToast("Error fetching child bugs.", "error", null); // Persistent error toast
+            })
+            .fetchChildBugDetailsWithCount(bugId);
+        } else {
+          removeProcessToast("fetchChildBugsProcess"); // Remove the "Counting child bugs" toast
+          showToast("No child bugs found for this ID.", "info", 3000);
+          hideLoadingOverlay(childBugListSection);
+        }
+      })
+      .withFailureHandler((error) => {
+        // If count fails, no elapsed time toast would have started, but ensure 'Counting' toast is removed
+        removeProcessToast("fetchChildBugsProcess");
+        console.error("Error determining child bug count:", error);
+        showToast("Error determining child bug count.", "error", null); // Persistent error toast
+        hideLoadingOverlay(childBugListSection);
+      })
+      .fetchChildBugCount(bugId);
+  }
+
+  /**
+   * Adds a verification comment to the selected child bug.
+   * @param {boolean} reproducible - True if reproducible, false otherwise.
+   */
+  function addVerificationComment(reproducible) {
+    const selectedBugItem = document.querySelector(".child-bug-item.is-active");
+    if (!selectedBugItem) {
+      showToast("Please select a child bug first.", "info");
+      return;
+    }
+
+    const bugId = selectedBugItem.getAttribute("data-bug-id");
+    const reproducibilityStatement = reproducible
+      ? "The issue is reproducible."
+      : "The issue is not reproducible.";
+    const deviceDetails = bugVerificationDeviceDetails
+      ? bugVerificationDeviceDetails.value.trim()
+      : "";
+    const additionalVerificationData = document.getElementById(
+      "additionalVerificationData"
+    )
+      ? document.getElementById("additionalVerificationData").value.trim()
+      : "";
+
+    // NEW LOGIC: Check if at least one of the fields is provided
+    if (!deviceDetails && !additionalVerificationData) {
+      showToast(
+        "Please provide either Device Details or Additional verification data to comment.",
+        "error"
+      );
+      return;
+    }
+
+    let fullComment = `${reproducibilityStatement}`; // Start with the reproducibility statement
+
+    // Append Device Details if available
+    if (deviceDetails) {
+      fullComment += `\n\nDevice Details:\n${deviceDetails}`;
+    }
+
+    // Append Additional Verification Data if available
+    if (additionalVerificationData) {
+      // Add a blank line before additional data if device details were also present or if it's the first data section
+      if (deviceDetails) {
+        fullComment += `\n`; // Add another newline if both are present for separation
+      } else {
+        fullComment += `\n\n`; // Add two newlines if only additional data is present
+      }
+      fullComment += `\nAdditional verification data:\n${additionalVerificationData}`;
+    }
+
+    showToast(`Adding comment to Bug ${bugId}...`, "info");
+    showLoadingOverlay(verificationSection);
+
+    console.log({
+      bugId,
+      fullComment,
+      aiSummaryDisplay: aiSummaryDisplay.textContent,
+      googleSheetLinkInput,
+      bugIdInput,
+      reproducible,
+    });
+
+    google.script.run
+      .withSuccessHandler((result) => {
+        if (result.success) {
+          showToast(`Comment added to Bug ${bugId} successfully!`, "success");
+          // Clear the text areas after successful comment
+          const addDataTextArea = document.getElementById(
+            "additionalVerificationData"
+          );
+          if (addDataTextArea) addDataTextArea.value = "";
+          upgradeMdlTextField(bugVerificationDeviceDetails); // Update MDL state
+          upgradeMdlTextField(addDataTextArea); // Update MDL state
+          hideLoadingOverlay(verificationSection);
+          updateTokenAndCost(result.tokens, result.cost);
+        } else {
+          showToast(
+            `Failed to add comment to Bug ${bugId}: ${result.error}`,
+            "error"
+          );
+          hideLoadingOverlay(verificationSection);
+        }
+      })
+      .withFailureHandler((error) => {
+        console.error("Error adding comment:", error);
+        showToast(`Error adding comment to Bug ${bugId}.`, "error");
+        hideLoadingOverlay(verificationSection);
+      })
+      .addBugComment(
+        bugId,
+        fullComment,
+        aiSummaryDisplay.textContent,
+        googleSheetLinkInput.value,
+        bugIdInput.value,
+        reproducible
+      );
+  }
+
+  // --- Main Logic on DOMContentLoaded ---
+  document.addEventListener("DOMContentLoaded", () => {
+    // Assign DOM element references
+    editableBugDescription = document.getElementById("editableBugDescription");
+    generatedTitleDisplay = document.getElementById("generatedTitleDisplay");
+    outputContainer = document.getElementById("outputContainer");
+    statusDiv = document.getElementById("statusMessage");
+    generateBtn = document.getElementById("generateBug");
+    reportBtn = document.getElementById("reportBug");
+    deviceDetailsTextArea = document.getElementById("deviceDetails");
+    hotlistsHiddenInput = document.getElementById("hotlistsHiddenInput");
+    hotlistsInputArea = document.getElementById("hotlistsInputArea");
+    hotlistsVisibleInput = document.getElementById("hotlistsVisibleInput");
+    hotlistChipsContainer = document.getElementById("hotlistSuggestions");
+    componentSelect = document.getElementById("component");
+    deviceTypeSelect = document.getElementById("deviceType");
+    deviceModeSelect = document.getElementById("deviceMode");
+    applicationTypeSelect = document.getElementById("applicationType");
+    bugVerificationDeviceDetails = document.getElementById(
+      "bugVerificationDeviceDetails"
+    );
+    fetchChildBugsBtn = document.getElementById("fetchChildBugsBtn");
+    reproducibleBtn = document.getElementById("reproducibleBtn");
+    notReproducibleBtn = document.getElementById("notReproducibleBtn");
+    childBugList = document.getElementById("childBugList");
+    childBugListStatus = document.getElementById("childBugListStatus");
+    aiSummaryDisplay = document.getElementById("aiSummaryDisplay");
+    bugContentsAccordionBody = document.getElementById(
+      "bugContentsAccordionBody"
+    );
+    onePagerDocUrlInput = document.getElementById("onePagerDocUrlInput");
+    triggerOnePagerBtn = document.getElementById("triggerOnePagerBtn");
+    onePagerStatusDiv = document.getElementById("onePagerStatus");
+    bugIdInput = document.getElementById("masterBugIdInput");
+    testReportGoogleSheetUrlInput = document.getElementById(
+      "testReportGoogleSheetUrl"
+    );
+
+    googleSheetLinkInput = document.getElementById("googleSheetLinkInput");
+    extractedBugIdsDisplay = document.getElementById("extractedBugIdsDisplay");
+
+    masterBugInputSection = document.getElementById("masterBugInputSection");
+    childBugListSection = document.getElementById("childBugListSection");
+    verificationSection = document.getElementById("verificationSection");
+    userProfileImage = document.getElementById("userProfileImage");
+    tokensUsedSpan = document.getElementById("tokensUsed");
+    costUsedSpan = document.getElementById("costUsed");
+
+    appNameInput = document.getElementById("appNameInput");
+    appPackageNameInput = document.getElementById("appPackageNameInput");
+    appVersionInput = document.getElementById("appVersionInput");
+    deviceOsVersionInput = document.getElementById("deviceOsVersionInput");
+    deviceNameInput = document.getElementById("deviceNameInput");
+    summaryOfTestingInput = document.getElementById("summaryOfTestingInput");
+    chromeOsFeatureRequestsInput = document.getElementById(
+      "chromeOsFeatureRequestsInput"
+    );
+    priorityChromeOsAppBugsInput = document.getElementById(
+      "priorityChromeOsAppBugsInput"
+    );
+    pixelTabletAppBugsInput = document.getElementById(
+      "pixelTabletAppBugsInput"
+    );
+
+    gifUploadInput = document.getElementById("gifUploadInput");
+    attachButtonText = document.getElementById("buttonLabelText");
+    // clearGifSelectionButton = document.getElementById("clearGifSelection");
+    toastNotificationsContainer = document.getElementById(
+      "toastNotificationsContainer"
+    );
+
+    selectedHotlistsContainer = document.getElementById("selectedHotlists");
+    hotlistSuggestionsContainer = document.getElementById("hotlistSuggestions");
+
+    // Event listener for GIF file input change
+    gifUploadInput.addEventListener("change", function (event) {
+      if (event.target.files.length > 0) {
+        selectedGifFile = event.target.files[0];
+        attachButtonText.textContent = selectedGifFile.name; // Update button text
+        // clearGifSelectionButton.style.display = "inline-flex"; // Show clear button
+      } else {
+        selectedGifFile = null;
+        attachButtonText.textContent = "Attach GIF"; // Reset button text
+        // clearGifSelectionButton.style.display = "none"; // Hide clear button
+      }
+    });
+
+    // // Event listener for the clear GIF selection button
+    // clearGifSelectionButton.addEventListener("click", function () {
+    //   gifUploadInput.value = ""; // Clear the file input
+    //   selectedGifFile = null;
+    //   attachButtonText.textContent = "Attach GIF"; // Reset button text
+    //   clearGifSelectionButton.style.display = "none"; // Hide clear button
+    // });
+
+    const openDrivePickerBtn = document.getElementById("openDrivePickerBtn");
+    if (openDrivePickerBtn) {
+      openDrivePickerBtn.addEventListener("click", getAuthTokenAndOpenPicker);
+      // The button is initially disabled in HTML and enabled by onPickerApiLoad
+    }
+
+    google.script.run
+      .withSuccessHandler((user) => {
+        if (user.thumbnail && userProfileImage) {
+          userProfileImage.src = user.thumbnail;
+          userProfileImage.alt = user.email || "User Profile";
+        }
+      })
+      .withFailureHandler((error) => {
+        console.error("Error fetching user info:", error);
+        showToast("Failed to load user profile image.", "error");
+      })
+      .getUser();
+
     /**
-     * Adds a verification comment to the selected child bug.
-     * @param {boolean} reproducible - True if reproducible, false otherwise.
+     * Handles the GIF file upload to Google Drive.
+     * This function should be called AFTER the bug has been reported and a bugId is obtained.
+     * @param {string} bugId The ID of the reported bug, used for naming the GIF file.
+     * @param {File} gifFile The File object selected by the user.
      */
-    function addVerificationComment(reproducible) {
-        const selectedBugItem = document.querySelector('.child-bug-item.is-active');
-        if (!selectedBugItem) {
-            showToast('Please select a child bug first.', 'info');
-            return;
-        }
+    function handleGifUpload(bugId, gifFile) {
+      if (!gifFile) {
+        console.log("No GIF file selected for upload.");
+        return;
+      }
 
-        const bugId = selectedBugItem.getAttribute('data-bug-id');
-        const reproducibilityStatement = reproducible ? "The issue is reproducible." : "The issue is not reproducible.";
-        const deviceDetails = bugVerificationDeviceDetails ? bugVerificationDeviceDetails.value.trim() : '';
-        const additionalVerificationData = document.getElementById('additionalVerificationData') ? document.getElementById('additionalVerificationData').value.trim() : '';
+      showToast("Uploading GIF...", "info"); // Assuming you have a showToast function
 
-        // NEW LOGIC: Check if at least one of the fields is provided
-        if (!deviceDetails && !additionalVerificationData) {
-            showToast('Please provide either Device Details or Additional verification data to comment.', 'error');
-            return;
-        }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const base64Data = e.target.result.split(",")[1]; // Get only the Base64 part
 
-        let fullComment = `${reproducibilityStatement}`; // Start with the reproducibility statement
-
-        // Append Device Details if available
-        if (deviceDetails) {
-            fullComment += `\n\nDevice Details:\n${deviceDetails}`;
-        }
-
-        // Append Additional Verification Data if available
-        if (additionalVerificationData) {
-            // Add a blank line before additional data if device details were also present or if it's the first data section
-            if (deviceDetails) {
-                fullComment += `\n`; // Add another newline if both are present for separation
-            } else {
-                fullComment += `\n\n`; // Add two newlines if only additional data is present
-            }
-            fullComment += `\nAdditional verification data:\n${additionalVerificationData}`;
-        }
-
-        showToast(`Adding comment to Bug ${bugId}...`, 'info');
-        showLoadingOverlay(verificationSection);
-
-        console.log({bugId, fullComment, aiSummaryDisplay: aiSummaryDisplay.textContent, googleSheetLinkInput, bugIdInput, reproducible});
-        
         google.script.run
-            .withSuccessHandler(result => {
-                if (result.success) {
-                    showToast(`Comment added to Bug ${bugId} successfully!`, 'success');
-                    // Clear the text areas after successful comment
-                    const addDataTextArea = document.getElementById('additionalVerificationData');
-                    if (addDataTextArea) addDataTextArea.value = '';
-                    upgradeMdlTextField(bugVerificationDeviceDetails); // Update MDL state
-                    upgradeMdlTextField(addDataTextArea); // Update MDL state
-                    hideLoadingOverlay(verificationSection);
-                    updateTokenAndCost(result.tokens, result.cost);
-                } else {
-                    showToast(`Failed to add comment to Bug ${bugId}: ${result.error}`, 'error');
-                    hideLoadingOverlay(verificationSection);
-                }
-            })
-            .withFailureHandler(error => {
-                console.error("Error adding comment:", error);
-                showToast(`Error adding comment to Bug ${bugId}.`, 'error');
-                hideLoadingOverlay(verificationSection);
-            })
-            .addBugComment(bugId, fullComment, aiSummaryDisplay.textContent, googleSheetLinkInput.value, bugIdInput.value, reproducible);
-    }
-
-    // --- Main Logic on DOMContentLoaded ---
-    document.addEventListener('DOMContentLoaded', () => {
-        // Assign DOM element references
-        editableBugDescription = document.getElementById('editableBugDescription');
-        generatedTitleDisplay = document.getElementById('generatedTitleDisplay');
-        outputContainer = document.getElementById('outputContainer');
-        statusDiv = document.getElementById('statusMessage');
-        generateBtn = document.getElementById('generateBug');
-        reportBtn = document.getElementById('reportBug');
-        deviceDetailsTextArea = document.getElementById('deviceDetails');
-        hotlistsHiddenInput = document.getElementById('hotlistsHiddenInput');
-        hotlistsInputArea = document.getElementById('hotlistsInputArea');
-        hotlistsVisibleInput = document.getElementById('hotlistsVisibleInput');
-        hotlistChipsContainer = document.getElementById('hotlistSuggestions');
-        componentSelect = document.getElementById('component');
-        deviceTypeSelect = document.getElementById('deviceType');
-        deviceModeSelect = document.getElementById('deviceMode');
-        applicationTypeSelect = document.getElementById('applicationType');
-        bugVerificationDeviceDetails = document.getElementById('bugVerificationDeviceDetails');
-        fetchChildBugsBtn = document.getElementById('fetchChildBugsBtn');
-        reproducibleBtn = document.getElementById('reproducibleBtn');
-        notReproducibleBtn = document.getElementById('notReproducibleBtn');
-        childBugList = document.getElementById('childBugList');
-        childBugListStatus = document.getElementById('childBugListStatus');
-        aiSummaryDisplay = document.getElementById('aiSummaryDisplay');
-        bugContentsAccordionBody = document.getElementById('bugContentsAccordionBody');
-        onePagerBugIdsInput = document.getElementById('onePagerBugIdsInput');
-        onePagerDocUrlInput = document.getElementById('onePagerDocUrlInput');
-        triggerOnePagerBtn = document.getElementById('triggerOnePagerBtn');
-        onePagerStatusDiv = document.getElementById('onePagerStatus');
-        bugIdInput = document.getElementById('masterBugIdInput');
-        testReportGoogleSheetUrlInput = document.getElementById('testReportGoogleSheetUrl');
-        
-        googleSheetLinkInput = document.getElementById('googleSheetLinkInput');
-        extractedBugIdsDisplay = document.getElementById('extractedBugIdsDisplay');
-
-        masterBugInputSection = document.getElementById('masterBugInputSection');
-        childBugListSection = document.getElementById('childBugListSection');
-        verificationSection = document.getElementById('verificationSection');
-        userProfileImage = document.getElementById('userProfileImage');
-        tokensUsedSpan = document.getElementById('tokensUsed');
-        costUsedSpan = document.getElementById('costUsed');
-
-        appNameInput = document.getElementById("appNameInput");
-        appPackageNameInput = document.getElementById("appPackageNameInput");
-        appVersionInput = document.getElementById("appVersionInput");
-        deviceOsVersionInput = document.getElementById("deviceOsVersionInput");
-        deviceNameInput = document.getElementById("deviceNameInput");
-        summaryOfTestingInput = document.getElementById("summaryOfTestingInput");
-        chromeOsFeatureRequestsInput = document.getElementById("chromeOsFeatureRequestsInput");
-        priorityChromeOsAppBugsInput = document.getElementById("priorityChromeOsAppBugsInput");
-        pixelTabletAppBugsInput = document.getElementById("pixelTabletAppBugsInput");
-
-        gifUploadInput = document.getElementById('gifUploadInput');
-        attachButtonText = document.getElementById('buttonLabelText');
-        clearGifSelectionButton = document.getElementById('clearGifSelection');
-        toastNotificationsContainer = document.getElementById('toastNotificationsContainer');
-
-
-         // Event listener for GIF file input change
-        gifUploadInput.addEventListener('change', function(event) {
-          if (event.target.files.length > 0) {
-            selectedGifFile = event.target.files[0];
-            attachButtonText.textContent = selectedGifFile.name; // Update button text
-            clearGifSelectionButton.style.display = 'inline-flex'; // Show clear button
-          } else {
-            selectedGifFile = null;
-            attachButtonText.textContent = 'Attach GIF'; // Reset button text
-            clearGifSelectionButton.style.display = 'none'; // Hide clear button
-          }
-        });
-
-        // Event listener for the clear GIF selection button
-        clearGifSelectionButton.addEventListener('click', function() {
-          gifUploadInput.value = ''; // Clear the file input
-          selectedGifFile = null;
-          attachButtonText.textContent = 'Attach GIF'; // Reset button text
-          clearGifSelectionButton.style.display = 'none'; // Hide clear button
-        });
-
-        const openDrivePickerBtn = document.getElementById('openDrivePickerBtn');
-        if (openDrivePickerBtn) {
-          openDrivePickerBtn.addEventListener('click', getAuthTokenAndOpenPicker);
-          // The button is initially disabled in HTML and enabled by onPickerApiLoad
-        }
-
-         google.script.run
-            .withSuccessHandler(user => {
-                if (user.thumbnail && userProfileImage) {
-                    userProfileImage.src = user.thumbnail;
-                    userProfileImage.alt = user.email || "User Profile";
-                }
-            })
-            .withFailureHandler(error => {
-                console.error("Error fetching user info:", error);
-                showToast("Failed to load user profile image.", 'error');
-            })
-            .getUser();
-
-        
-        /**
-         * Handles the GIF file upload to Google Drive.
-         * This function should be called AFTER the bug has been reported and a bugId is obtained.
-         * @param {string} bugId The ID of the reported bug, used for naming the GIF file.
-         * @param {File} gifFile The File object selected by the user.
-         */
-        function handleGifUpload(bugId, gifFile) {
-          if (!gifFile) {
-            console.log('No GIF file selected for upload.');
-            return;
-          }
-
-          showToast('Uploading GIF...', 'info'); // Assuming you have a showToast function
-
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const base64Data = e.target.result.split(',')[1]; // Get only the Base64 part
-
-            google.script.run
-              .withSuccessHandler(response => {
-                if (response.status === 'success') {
-                  showToast(`GIF uploaded: ${response.fileName}`, 'success');
-                  // Optionally clear the file input after successful upload
-                  gifUploadInput.value = '';
-                  uploadGifFileName.value = '';
-                  selectedGifFile = null; // Clear the stored file
-                } else {
-                  showToast(`GIF upload failed: ${response.message}`, 'error');
-                }
-              })
-              .withFailureHandler(error => {
-                showToast(`GIF upload error: ${error.message}`, 'error');
-                console.error('GIF upload error:', error);
-              })
-              .uploadGifToDrive(base64Data, bugId); // Call the Apps Script function
-          };
-          reader.onerror = function(e) {
-            showToast('Failed to read GIF file.', 'error');
-            console.error('FileReader error:', e);
-          };
-          reader.readAsDataURL(gifFile); // Read the file as Base64
-        }
-
-        /**
-         * Helper function to update Material Design Lite (MDL) textfield state.
-         * @param {HTMLElement} element The input or textarea HTML element.
-         */
-        function updateMaterialTextfield(element) {
-          if (element && element.parentElement && element.parentElement.MaterialTextfield) {
-            element.parentElement.MaterialTextfield.checkDirty();
-          }
-        }
-
-        /**
-         * Helper function to clear all relevant input fields and update their MDL states.
-         */
-        function clearAndResetAllFields() {
-          appNameInput.value = '';
-          appPackageNameInput.value = '';
-          appVersionInput.value = '';
-          deviceNameInput.value = '';
-          deviceOsVersionInput.value = '';
-          summaryOfTestingInput.value = '';
-          extractedBugIdsDisplay.value = '';
-          priorityChromeOsAppBugsInput.value = '';
-          pixelTabletAppBugsInput.value = '';
-          chromeOsFeatureRequestsInput.value = '';
-
-          // Update MDL states for all fields
-          updateMaterialTextfield(appNameInput);
-          updateMaterialTextfield(appPackageNameInput);
-          updateMaterialTextfield(appVersionInput);
-          updateMaterialTextfield(deviceNameInput);
-          updateMaterialTextfield(deviceOsVersionInput);
-          updateMaterialTextfield(summaryOfTestingInput);
-          updateMaterialTextfield(extractedBugIdsDisplay);
-          updateMaterialTextfield(priorityChromeOsAppBugsInput);
-          updateMaterialTextfield(pixelTabletAppBugsInput);
-          updateMaterialTextfield(chromeOsFeatureRequestsInput);
-        }
-
-        // Event listener for changes in the Google Sheet URL input
-        testReportGoogleSheetUrlInput.addEventListener('input', function() {
-          const url = this.value;
-          const isValidUrl = this.checkValidity();
-
-          if (isValidUrl && url.trim() !== '') {
-            showToast('Fetching bug IDs...', 'info');
-            //toggleLoading(true);
-            google.script.run
-              .withSuccessHandler(function(result) {
-                /**
-                 * Returns
-                 * {
-                 *  "appName": "Extracted App Name",
-                 *  "appVersion": "Extracted App Version",
-                 *  "deviceName": "Extracted Device Name",
-                 *  "deviceOsVersion": "Formatted Device OS Version",
-                 *  "summaryOfTesting": "Extracted Summary of Testing",
-                 *  "categorizedBugs": {
-                 *   "Priority ChromeOS App Bugs": ["Bug Title C", "Bug Title D", "..."],
-                 *   "Pixel Tablet App Bugs": ["Bug Title A", "Bug Title B", "..."],
-                 *   "ChromeOS Feature Requests": ["Feature Request 1", "Feature Request 2", "..."]
-                 *  },
-                 *    "allowedBugIds": {
-                 *      "23454324", "90790244", "89698456", "564234", "892459845"
-                 *   }
-                 *  }
-                 */
-                console.log(result);
-                if(result && result.status === "error"){
-                  showToast(result.message, "error");
-                  clearAndResetAllFields(); 
-                }
-                else if(result && typeof result === 'object'){
-                  // Destructure the result object directly from the AI's expected output format
-                  let {appName, appPackageName, appVersion, deviceName, deviceOsVersion, summaryOfTesting, categorizedBugs, allowedBugIds} = result;
-
-                  appNameInput.value = appName || '';
-                  appPackageNameInput.value = appPackageName || '';
-                  appVersionInput.value = appVersion || '';
-                  deviceNameInput.value = deviceName || '';
-                  deviceOsVersionInput.value = deviceOsVersion || '';
-                  summaryOfTestingInput.value = summaryOfTesting || '';
-
-                  priorityChromeOsAppBugsInput.value = (categorizedBugs && categorizedBugs.priorityChromeOSAppBugs) ? categorizedBugs.priorityChromeOSAppBugs.join('\n') : '';
-                  pixelTabletAppBugsInput.value = (categorizedBugs && categorizedBugs.pixelTabletAppBugs) ? categorizedBugs.pixelTabletAppBugs.join('\n') : '';
-                  chromeOsFeatureRequestsInput.value = (categorizedBugs && categorizedBugs.chromeOSFeatureRequests) ? categorizedBugs.chromeOSFeatureRequests.join('\n') : '';
-
-                  // Populate the extracted bug IDs display field
-                  extractedBugIdsDisplay.value = (allowedBugIds && allowedBugIds.length > 0) ? allowedBugIds.join(', ') : '';
-                  // Update Material Design Lite states for all populated fields
-                  updateMaterialTextfield(appNameInput);
-                  updateMaterialTextfield(appPackageName);
-                  updateMaterialTextfield(appVersionInput);
-                  updateMaterialTextfield(deviceNameInput);
-                  updateMaterialTextfield(deviceOsVersionInput);
-                  updateMaterialTextfield(summaryOfTestingInput);
-                  updateMaterialTextfield(priorityChromeOsAppBugsInput);
-                  updateMaterialTextfield(pixelTabletAppBugsInput);
-                  updateMaterialTextfield(chromeOsFeatureRequestsInput);
-                  updateMaterialTextfield(extractedBugIdsDisplay);
-  
-                  showToast('App details and bug categories retrieved successfully!', 'success');
-
-                }else{
-                  // Handle cases where the Apps Script returns no data or unexpected format
-                  showToast('No data returned or unexpected format from Apps Script. Check logs.', 'warning');
-                  clearAndResetAllFields();
-                }
-              })
-              .withFailureHandler(function(error) {
-                  showToast('Error retrieving data: ' + error.message, 'error');
-                  clearAndResetAllFields(); 
-              })
-              .fetchBugIdsFromSheet(url);
-          } else {
-              showToast('Please enter a valid Google Sheet URL to fetch data.', 'warning');
-              clearAndResetAllFields();
-          }
-        });
-
-        // Initialize MDL textfields if they exist
-        if (onePagerBugIdsInput) upgradeMdlTextField(onePagerBugIdsInput);
-        if (onePagerDocUrlInput) upgradeMdlTextField(onePagerDocUrlInput);
-
-        // Add event listener for the new one-pager button
-        if (triggerOnePagerBtn) {
-            triggerOnePagerBtn.addEventListener('click', triggerOnePagerGeneration);
-        }
-
-        // Initialize default device details and upgrade MDL textfield
-        if (deviceDetailsTextArea) {
-            deviceDetailsTextArea.value = defaultDeviceDetails;
-            upgradeMdlTextField(deviceDetailsTextArea);
-        }
-
-        // Initialize hotlist visible input if it doesn't exist (e.g., from server render)
-        if (!hotlistsVisibleInput && hotlistsInputArea) {
-            hotlistsVisibleInput = document.createElement('input');
-            hotlistsVisibleInput.type = 'text';
-            hotlistsVisibleInput.id = 'hotlistsVisibleInput';
-            hotlistsVisibleInput.className = 'mdl-textfield__input';
-            hotlistsVisibleInput.placeholder = 'Type or click to add hotlists';
-            hotlistsInputArea.appendChild(hotlistsVisibleInput);
-            // Need to ensure the parent mdl-textfield listens to this new input
-            const parentMdlTextfield = hotlistsInputArea.closest('.mdl-textfield');
-            if (parentMdlTextfield) {
-                // Manually upgrade the new input if needed
-                componentHandler.upgradeElement(parentMdlTextfield);
-                upgradeMdlTextField(hotlistsVisibleInput); // Initial check for MDL dirtiness
-            }
-        }
-
-        // Event Listeners for Bug Generation Tab
-        if (generateBtn) {
-        generateBtn.addEventListener('click', () => {
-            console.log("Generate button clicked.");
-            startElapsedTimeUpdater('generateDescriptionProcess');
-            const formData = getFormDataForGeneration();
-            if (formData) {
-                //showLoading(true); // Show loading indicator
-                generateBtn.disabled = true; // Disable generate button during generation
-                if (reportBtn) reportBtn.disabled = true; // Disable report button too
-
-                google.script.run
-                    .withSuccessHandler(handleGenerationResponse)
-                    .withFailureHandler(error => {
-                        console.error("Error calling generateBugDescription:", error);
-                        //showLoading(false); // Hide loading on error
-                        generateBtn.disabled = false; // Re-enable generate button
-                        if (reportBtn) reportBtn.disabled = true; // Keep report disabled
-                        showToast(`Error generating bug: ${error.message || error}`, 'error');
-                    })
-                    .generateBugDescription(formData);
-            }
-        });
-    }
-
-
-        if (reportBtn) {
-            reportBtn.addEventListener('click', () => {
-                showToast('Reporting bug...', 'info');
-                google.script.run
-                    .withSuccessHandler(response => {
-                        if (response.success) {
-                          const successBugId = response.bugId;
-                            showToast(`Bug reported! ID: ${successBugId} (URL: <a href="${response.bugUrl}" target="_blank">${response.bugUrl}</a>)`, 'success', false);
-                            // Clear form after successful report
-                            document.getElementById('command').value = '';
-                            
-
-                            // If a GIF was selected AND a bugId was obtained, then proceed with GIF upload
-                            if (successBugId && selectedGifFile) {
-                              handleGifUpload(successBugId, selectedGifFile);
-                            }
-    
-                            if (bugVerificationDeviceDetails) { // Update verification panel too
-                                bugVerificationDeviceDetails.value = sharedDeviceDetails;
-                                upgradeMdlTextField(bugVerificationDeviceDetails);
-                            }
-                            // Reset MDL fields
-                            const mdlTextfields = document.querySelectorAll('.mdl-textfield');
-                            mdlTextfields.forEach(field => {
-                                if (field.MaterialTextfield) {
-                                    field.MaterialTextfield.checkDirty();
-                                    field.MaterialTextfield.checkValidity();
-                                }
-                            });
-                             // Force select options to update their visual state
-                            componentHandler.upgradeDom('MaterialSelectfield'); // Assuming a custom MDL select upgrade
-
-                            // Re-upgrade specific elements to ensure labels are correct
-                            upgradeMdlTextField(document.getElementById('command'));
-                            upgradeMdlTextField(editableBugDescription);
-                            upgradeMdlTextField(generatedTitleDisplay);
-                            upgradeMdlTextField(deviceDetailsTextArea);
-                        } else {
-                            showToast(`Error: ${response.message || 'Failed to report bug'}`, 'error');
-                        }
-                        //showLoading(false);
-                        reportBtn.disabled = false;
-                        generateBtn.disabled = false;
-                    })
-                    .withFailureHandler(error => {
-                        console.error("Error reporting bug:", error);
-                        showToast("Failed to report bug.", 'error');
-                        //showLoading(false);
-                        reportBtn.disabled = false;
-                        generateBtn.disabled = false;
-                    })
-                    .reportBug({
-                        title: generatedTitle,
-                        body: editableBugDescription.value,
-                        componentId: componentSelect.value,
-                        priority: document.getElementById('priority').value,
-                        bugType: document.getElementById('bugType').value,
-                        deviceType: deviceTypeSelect.value,
-                        applicationType: applicationTypeSelect.value,
-                        masterBugs: document.getElementById('masterBugs').value,
-                        hotlistNames: selectedHotlistNames
-                    });
-            });
-        }
-
-        // Hotlists logic: Fetch suggestions on select change
-        const hotlistSelectionChange = () => {
-            const component = componentSelect ? componentSelect.value : '';
-            const deviceType = deviceTypeSelect ? deviceTypeSelect.value : '';
-            const applicationType = applicationTypeSelect ? applicationTypeSelect.value : '';
-            if (component || deviceType || applicationType) { // Fetch if any relevant selection is made
-                fetchSuggestedHotlists(component, deviceType, applicationType);
+          .withSuccessHandler((response) => {
+            if (response.status === "success") {
+              showToast(`GIF uploaded: ${response.fileName}`, "success");
+              // Optionally clear the file input after successful upload
+              gifUploadInput.value = "";
+              uploadGifFileName.value = "";
+              selectedGifFile = null; // Clear the stored file
             } else {
-                hotlistChipsContainer.innerHTML = '<span class="status-message status-info">Select Component, Device Type, or App Type for hotlist suggestions.</span>';
+              showToast(`GIF upload failed: ${response.message}`, "error");
             }
-        };
+          })
+          .withFailureHandler((error) => {
+            showToast(`GIF upload error: ${error.message}`, "error");
+            console.error("GIF upload error:", error);
+          })
+          .uploadGifToDrive(base64Data, bugId); // Call the Apps Script function
+      };
+      reader.onerror = function (e) {
+        showToast("Failed to read GIF file.", "error");
+        console.error("FileReader error:", e);
+      };
+      reader.readAsDataURL(gifFile); // Read the file as Base64
+    }
 
-        if (componentSelect) componentSelect.addEventListener('change', hotlistSelectionChange);
-        if (deviceTypeSelect) deviceTypeSelect.addEventListener('change', hotlistSelectionChange);
-        if (applicationTypeSelect) applicationTypeSelect.addEventListener('change', hotlistSelectionChange);
+    /**
+     * Helper function to update Material Design Lite (MDL) textfield state.
+     * @param {HTMLElement} element The input or textarea HTML element.
+     */
+    function updateMaterialTextfield(element) {
+      if (
+        element &&
+        element.parentElement &&
+        element.parentElement.MaterialTextfield
+      ) {
+        element.parentElement.MaterialTextfield.checkDirty();
+      }
+    }
 
-        // Allow adding hotlist by pressing Enter in the visible input
-        if (hotlistsVisibleInput) {
-            hotlistsVisibleInput.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter' && hotlistsVisibleInput.value.trim() !== '') {
-                    event.preventDefault(); // Prevent form submission
-                    addHotlistChip(hotlistsVisibleInput.value.trim());
+    /**
+     * Helper function to clear all relevant input fields and update their MDL states.
+     */
+    function clearAndResetAllFields() {
+      appNameInput.value = "";
+      appPackageNameInput.value = "";
+      appVersionInput.value = "";
+      deviceNameInput.value = "";
+      deviceOsVersionInput.value = "";
+      summaryOfTestingInput.value = "";
+      extractedBugIdsDisplay.value = "";
+      priorityChromeOsAppBugsInput.value = "";
+      pixelTabletAppBugsInput.value = "";
+      chromeOsFeatureRequestsInput.value = "";
+
+      // Update MDL states for all fields
+      updateMaterialTextfield(appNameInput);
+      updateMaterialTextfield(appPackageNameInput);
+      updateMaterialTextfield(appVersionInput);
+      updateMaterialTextfield(deviceNameInput);
+      updateMaterialTextfield(deviceOsVersionInput);
+      updateMaterialTextfield(summaryOfTestingInput);
+      updateMaterialTextfield(extractedBugIdsDisplay);
+      updateMaterialTextfield(priorityChromeOsAppBugsInput);
+      updateMaterialTextfield(pixelTabletAppBugsInput);
+      updateMaterialTextfield(chromeOsFeatureRequestsInput);
+    }
+
+    // Event listener for changes in the Google Sheet URL input
+    testReportGoogleSheetUrlInput.addEventListener("input", function () {
+      const url = this.value;
+      const isValidUrl = this.checkValidity();
+
+      if (isValidUrl && url.trim() !== "") {
+        showToast("Fetching bug IDs...", "info");
+        //toggleLoading(true);
+        google.script.run
+          .withSuccessHandler(function (result) {
+            /**
+             * Returns
+             * {
+             *  "appName": "Extracted App Name",
+             *  "appVersion": "Extracted App Version",
+             *  "deviceName": "Extracted Device Name",
+             *  "deviceOsVersion": "Formatted Device OS Version",
+             *  "summaryOfTesting": "Extracted Summary of Testing",
+             *  "categorizedBugs": {
+             *   "Priority ChromeOS App Bugs": ["Bug Title C", "Bug Title D", "..."],
+             *   "Pixel Tablet App Bugs": ["Bug Title A", "Bug Title B", "..."],
+             *   "ChromeOS Feature Requests": ["Feature Request 1", "Feature Request 2", "..."]
+             *  },
+             *    "allowedBugIds": {
+             *      "23454324", "90790244", "89698456", "564234", "892459845"
+             *   }
+             *  }
+             */
+            console.log(result);
+            if (result && result.status === "error") {
+              showToast(result.message, "error");
+              clearAndResetAllFields();
+            } else if (result && typeof result === "object") {
+              // Destructure the result object directly from the AI's expected output format
+              let {
+                appName,
+                appPackageName,
+                appVersion,
+                deviceName,
+                deviceOsVersion,
+                summaryOfTesting,
+                categorizedBugs,
+                allowedBugIds,
+              } = result;
+
+              appNameInput.value = appName || "";
+              appPackageNameInput.value = appPackageName || "";
+              appVersionInput.value = appVersion || "";
+              deviceNameInput.value = deviceName || "";
+              deviceOsVersionInput.value = deviceOsVersion || "";
+              summaryOfTestingInput.value = summaryOfTesting || "";
+
+              priorityChromeOsAppBugsInput.value =
+                categorizedBugs && categorizedBugs.priorityChromeOSAppBugs
+                  ? categorizedBugs.priorityChromeOSAppBugs.join("\n")
+                  : "";
+              pixelTabletAppBugsInput.value =
+                categorizedBugs && categorizedBugs.pixelTabletAppBugs
+                  ? categorizedBugs.pixelTabletAppBugs.join("\n")
+                  : "";
+              chromeOsFeatureRequestsInput.value =
+                categorizedBugs && categorizedBugs.chromeOSFeatureRequests
+                  ? categorizedBugs.chromeOSFeatureRequests.join("\n")
+                  : "";
+
+              // Populate the extracted bug IDs display field
+              extractedBugIdsDisplay.value =
+                allowedBugIds && allowedBugIds.length > 0
+                  ? allowedBugIds.join(", ")
+                  : "";
+              // Update Material Design Lite states for all populated fields
+              updateMaterialTextfield(appNameInput);
+              updateMaterialTextfield(appPackageName);
+              updateMaterialTextfield(appVersionInput);
+              updateMaterialTextfield(deviceNameInput);
+              updateMaterialTextfield(deviceOsVersionInput);
+              updateMaterialTextfield(summaryOfTestingInput);
+              updateMaterialTextfield(priorityChromeOsAppBugsInput);
+              updateMaterialTextfield(pixelTabletAppBugsInput);
+              updateMaterialTextfield(chromeOsFeatureRequestsInput);
+              updateMaterialTextfield(extractedBugIdsDisplay);
+
+              showToast(
+                "App details and bug categories retrieved successfully!",
+                "success"
+              );
+            } else {
+              // Handle cases where the Apps Script returns no data or unexpected format
+              showToast(
+                "No data returned or unexpected format from Apps Script. Check logs.",
+                "warning"
+              );
+              clearAndResetAllFields();
+            }
+          })
+          .withFailureHandler(function (error) {
+            showToast("Error retrieving data: " + error.message, "error");
+            clearAndResetAllFields();
+          })
+          .fetchBugIdsFromSheet(url);
+      } else {
+        showToast(
+          "Please enter a valid Google Sheet URL to fetch data.",
+          "warning"
+        );
+        clearAndResetAllFields();
+      }
+    });
+
+    // Initialize MDL textfields if they exist
+    if (onePagerBugIdsInput) upgradeMdlTextField(onePagerBugIdsInput);
+    if (onePagerDocUrlInput) upgradeMdlTextField(onePagerDocUrlInput);
+
+    // Add event listener for the new one-pager button
+    if (triggerOnePagerBtn) {
+      triggerOnePagerBtn.addEventListener("click", triggerOnePagerGeneration);
+    }
+
+    // Initialize default device details and upgrade MDL textfield
+    if (deviceDetailsTextArea) {
+      deviceDetailsTextArea.value = defaultDeviceDetails;
+      upgradeMdlTextField(deviceDetailsTextArea);
+    }
+
+    // Initialize hotlist visible input if it doesn't exist (e.g., from server render)
+    if (!hotlistsVisibleInput && hotlistsInputArea) {
+      hotlistsVisibleInput = document.createElement("input");
+      hotlistsVisibleInput.type = "text";
+      hotlistsVisibleInput.id = "hotlistsVisibleInput";
+      hotlistsVisibleInput.className = "mdl-textfield__input";
+      hotlistsVisibleInput.placeholder = "Type or click to add hotlists";
+      hotlistsInputArea.appendChild(hotlistsVisibleInput);
+      // Need to ensure the parent mdl-textfield listens to this new input
+      const parentMdlTextfield = hotlistsInputArea.closest(".mdl-textfield");
+    }
+
+    // Event Listeners for Bug Generation Tab
+    if (generateBtn) {
+      generateBtn.addEventListener("click", () => {
+        console.log("Generate button clicked.");
+        startElapsedTimeUpdater("generateDescriptionProcess");
+        const formData = getFormDataForGeneration();
+        if (formData) {
+          //showLoading(true); // Show loading indicator
+          generateBtn.disabled = true; // Disable generate button during generation
+          if (reportBtn) reportBtn.disabled = true; // Disable report button too
+
+          google.script.run
+            .withSuccessHandler(handleGenerationResponse)
+            .withFailureHandler((error) => {
+              console.error("Error calling generateBugDescription:", error);
+              //showLoading(false); // Hide loading on error
+              generateBtn.disabled = false; // Re-enable generate button
+              if (reportBtn) reportBtn.disabled = true; // Keep report disabled
+              showToast(
+                `Error generating bug: ${error.message || error}`,
+                "error"
+              );
+            })
+            .generateBugDescription(formData);
+        }
+      });
+    }
+
+    if (reportBtn) {
+      reportBtn.addEventListener("click", () => {
+        showToast("Reporting bug...", "info");
+        google.script.run
+          .withSuccessHandler((response) => {
+            if (response.success) {
+              const successBugId = response.bugId;
+              showToast(
+                `Bug reported! ID: ${successBugId} (URL: <a href="${response.bugUrl}" target="_blank">${response.bugUrl}</a>)`,
+                "success",
+                false
+              );
+              // Clear form after successful report
+              document.getElementById("command").value = "";
+
+              // If a GIF was selected AND a bugId was obtained, then proceed with GIF upload
+              if (successBugId && selectedGifFile) {
+                handleGifUpload(successBugId, selectedGifFile);
+              }
+
+              if (bugVerificationDeviceDetails) {
+                // Update verification panel too
+                bugVerificationDeviceDetails.value = sharedDeviceDetails;
+                upgradeMdlTextField(bugVerificationDeviceDetails);
+              }
+              // Reset MDL fields
+              const mdlTextfields = document.querySelectorAll(".mdl-textfield");
+              mdlTextfields.forEach((field) => {
+                if (field.MaterialTextfield) {
+                  field.MaterialTextfield.checkDirty();
+                  field.MaterialTextfield.checkValidity();
                 }
-            });
-        }
+              });
+              // Re-upgrade specific elements to ensure labels are correct
+              upgradeMdlTextField(document.getElementById("command"));
+              upgradeMdlTextField(editableBugDescription);
+              upgradeMdlTextField(generatedTitleDisplay);
+              upgradeMdlTextField(deviceDetailsTextArea);
+            } else {
+              showToast(
+                `Error: ${response.message || "Failed to report bug"}`,
+                "error"
+              );
+            }
+            //showLoading(false);
+            reportBtn.disabled = false;
+            generateBtn.disabled = false;
+          })
+          .withFailureHandler((error) => {
+            console.error("Error reporting bug:", error);
+            showToast("Failed to report bug.", "error");
+            //showLoading(false);
+            reportBtn.disabled = false;
+            generateBtn.disabled = false;
+          })
+          .reportBug({
+            title: generatedTitle,
+            body: editableBugDescription.value,
+            componentId: componentSelect.value,
+            priority: document.getElementById("priority").value,
+            bugType: document.getElementById("bugType").value,
+            deviceType: deviceTypeSelect.value,
+            applicationType: applicationTypeSelect.value,
+            masterBugs: document.getElementById("masterBugs").value,
+            hotlistNames: selectedHotlistNames,
+          });
+      });
+    }
 
-        // Handle backspace in hotlistsVisibleInput to remove last chip if input is empty
-        if (hotlistsVisibleInput) {
-            hotlistsVisibleInput.addEventListener('keydown', (event) => {
-                if (event.key === 'Backspace' && hotlistsVisibleInput.value === '' && selectedHotlistNames.length > 0) {
-                    // Find the last chip element directly from DOM
-                    const lastChipElement = hotlistsInputArea.querySelector('.hotlist-chip:last-of-type');
-                    if (lastChipElement) {
-                        const lastChipText = lastChipElement.querySelector('.mdl-chip__text').textContent; // Get text before removal
-                        lastChipElement.remove();
-                        selectedHotlistNames = selectedHotlistNames.filter(name => name !== lastChipText); // Remove from array
-                        updateHotlistsHiddenInput();
-                        showToast(`Removed '${lastChipText}'.`, 'info');
-                    }
-                 }
-            });
-        }
+    // Hotlists logic: Fetch suggestions on select change
+    const hotlistSelectionChange = () => {
+      const component = componentSelect ? componentSelect.value : "";
+      const deviceType = deviceTypeSelect ? deviceTypeSelect.value : "";
+      const applicationType = applicationTypeSelect
+        ? applicationTypeSelect.value
+        : "";
+      if (component || deviceType || applicationType) {
+        // Fetch if any relevant selection is made
+        fetchSuggestedHotlists(component, deviceType, applicationType);
+      } else {
+        hotlistChipsContainer.innerHTML =
+          '<span class="status-message status-info">Select Component, Device Type, or App Type for hotlist suggestions.</span>';
+      }
+    };
 
-        // Store device details when changed and synchronize with bug verification tab
-        if (deviceDetailsTextArea) {
-            deviceDetailsTextArea.addEventListener('input', () => {
-                sharedDeviceDetails = deviceDetailsTextArea.value;
-                if (bugVerificationDeviceDetails) { // Synchronize with verification tab's device details
-                    bugVerificationDeviceDetails.value = sharedDeviceDetails;
-                    upgradeMdlTextField(bugVerificationDeviceDetails); // Update MDL state
-                }
-            });
-        }
+    if (componentSelect)
+      componentSelect.addEventListener("change", hotlistSelectionChange);
+    if (deviceTypeSelect)
+      deviceTypeSelect.addEventListener("change", hotlistSelectionChange);
+    if (applicationTypeSelect)
+      applicationTypeSelect.addEventListener("change", hotlistSelectionChange);
 
-        // Initialize bugVerificationDeviceDetails if it exists using shared details
+    // Allow adding hotlist by pressing Enter in the visible input
+    if (hotlistsVisibleInput) {
+      hotlistsVisibleInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && hotlistsVisibleInput.value.trim() !== "") {
+          event.preventDefault(); // Prevent form submission
+          addHotlistChip(hotlistsVisibleInput.value.trim());
+        }
+      });
+    }
+
+    // Handle backspace in hotlistsVisibleInput to remove last chip if input is empty
+    if (hotlistsVisibleInput) {
+      hotlistsVisibleInput.addEventListener("keydown", (event) => {
+        if (
+          event.key === "Backspace" &&
+          hotlistsVisibleInput.value === "" &&
+          selectedHotlistNames.length > 0
+        ) {
+          // Find the last chip element directly from DOM
+          const lastChipElement = hotlistsInputArea.querySelector(
+            ".hotlist-chip:last-of-type"
+          );
+          if (lastChipElement) {
+            const lastChipText =
+              lastChipElement.querySelector(".mdl-chip__text").textContent; // Get text before removal
+            lastChipElement.remove();
+            selectedHotlistNames = selectedHotlistNames.filter(
+              (name) => name !== lastChipText
+            ); // Remove from array
+            updateHotlistsHiddenInput();
+            showToast(`Removed '${lastChipText}'.`, "info");
+          }
+        }
+      });
+    }
+
+    // Store device details when changed and synchronize with bug verification tab
+    if (deviceDetailsTextArea) {
+      deviceDetailsTextArea.addEventListener("input", () => {
+        sharedDeviceDetails = deviceDetailsTextArea.value;
         if (bugVerificationDeviceDetails) {
+          // Synchronize with verification tab's device details
+          bugVerificationDeviceDetails.value = sharedDeviceDetails;
+          upgradeMdlTextField(bugVerificationDeviceDetails); // Update MDL state
+        }
+      });
+    }
+
+    // Initialize bugVerificationDeviceDetails if it exists using shared details
+    if (bugVerificationDeviceDetails) {
+      bugVerificationDeviceDetails.value = sharedDeviceDetails;
+      upgradeMdlTextField(bugVerificationDeviceDetails);
+    }
+
+    if (sharedDeviceDetails) {
+      deviceDetailsTextArea.value = sharedDeviceDetails;
+      if (bugVerificationDeviceDetails) {
+        bugVerificationDeviceDetails.value = sharedDeviceDetails;
+      }
+    }
+
+    // Also ensure MDL components are updated after setting initial values
+    upgradeMdlTextField(deviceDetailsTextArea);
+    if (bugVerificationDeviceDetails) {
+      upgradeMdlTextField(bugVerificationDeviceDetails);
+    }
+
+    // --- Bidirectional Synchronization for Device Details ---
+    if (deviceDetailsTextArea && bugVerificationDeviceDetails) {
+      // When user types in the AI Bug Reporter's Device Details
+      deviceDetailsTextArea.addEventListener("input", () => {
+        sharedDeviceDetails = deviceDetailsTextArea.value;
+        bugVerificationDeviceDetails.value = sharedDeviceDetails;
+        upgradeMdlTextField(bugVerificationDeviceDetails); // Update MDL styling
+      });
+
+      // When user types in the Bug Verification's Device Details
+      bugVerificationDeviceDetails.addEventListener("input", () => {
+        sharedDeviceDetails = bugVerificationDeviceDetails.value;
+        deviceDetailsTextArea.value = sharedDeviceDetails;
+        upgradeMdlTextField(deviceDetailsTextArea); // Update MDL styling
+      });
+    }
+
+    // Bug Verification Tab Event Listeners
+    if (fetchChildBugsBtn) {
+      // Check if the button exists before adding listener
+      fetchChildBugsBtn.addEventListener("click", fetchAndDisplayChildBugs);
+      // Listen for Enter key press on the masterBugIdInput
+      bugIdInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault(); // Prevent default form submission
+          fetchAndDisplayChildBugs();
+        }
+      });
+    }
+    if (reproducibleBtn) {
+      // Add null check for reproducibility buttons
+      reproducibleBtn.addEventListener("click", () =>
+        addVerificationComment(true)
+      );
+    }
+    if (notReproducibleBtn) {
+      // Add null check for reproducibility buttons
+      notReproducibleBtn.addEventListener("click", () =>
+        addVerificationComment(false)
+      );
+    }
+
+    // The real-time sync above handles updates, so we don't need a specific
+    // tab-switch update for device details anymore.
+    const tabBar = document.querySelector(".mdl-layout__tab-bar");
+    if (tabBar) {
+      tabBar.addEventListener("click", (event) => {
+        const tab = event.target.closest(".mdl-layout__tab");
+        if (tab && tab.hash === "#bug-verification-panel") {
+          // keep this, but the input listeners are more real-time.
+          // The core sharedDeviceDetails is the source of truth.
+          if (bugVerificationDeviceDetails && sharedDeviceDetails) {
             bugVerificationDeviceDetails.value = sharedDeviceDetails;
             upgradeMdlTextField(bugVerificationDeviceDetails);
+          }
         }
+      });
+    }
 
+    // Initial MDL upgrade for all form elements to handle any pre-filled or dynamically set values
+    // It's good practice to ensure all are handled.
+    upgradeMdlTextField(deviceDetailsTextArea);
+    upgradeMdlTextField(generatedTitleDisplay);
+    upgradeMdlTextField(editableBugDescription);
+    upgradeMdlTextField(hotlistsVisibleInput);
 
-        if (sharedDeviceDetails) {
-            deviceDetailsTextArea.value = sharedDeviceDetails;
-            if (bugVerificationDeviceDetails) {
-                bugVerificationDeviceDetails.value = sharedDeviceDetails;
-            }
-        }
+    const bugTypeSelect = document.getElementById("bugType");
+    const prioritySelect = document.getElementById("priority");
 
-        // Also ensure MDL components are updated after setting initial values
-        upgradeMdlTextField(deviceDetailsTextArea);
-        if (bugVerificationDeviceDetails) {
-            upgradeMdlTextField(bugVerificationDeviceDetails);
-        }
+    // Initial check for select fields (necessary for MDL to show label correctly if value is pre-selected)
+    if (
+      componentSelect.parentElement &&
+      componentSelect.parentElement.MaterialTextfield
+    )
+      componentSelect.parentElement.MaterialTextfield.checkDirty();
+    if (
+      bugTypeSelect.parentElement &&
+      bugTypeSelect.parentElement.MaterialTextfield
+    )
+      bugTypeSelect.parentElement.MaterialTextfield.checkDirty();
+    if (
+      deviceTypeSelect.parentElement &&
+      deviceTypeSelect.parentElement.MaterialTextfield
+    )
+      deviceTypeSelect.parentElement.MaterialTextfield.checkDirty();
+    if (
+      applicationTypeSelect.parentElement &&
+      applicationTypeSelect.parentElement.MaterialTextfield
+    )
+      applicationTypeSelect.parentElement.MaterialTextfield.checkDirty();
+    if (
+      prioritySelect.parentElement &&
+      prioritySelect.parentElement.MaterialTextfield
+    )
+      prioritySelect.parentElement.MaterialTextfield.checkDirty();
 
-        // --- Bidirectional Synchronization for Device Details ---
-        if (deviceDetailsTextArea && bugVerificationDeviceDetails) {
-            // When user types in the AI Bug Reporter's Device Details
-            deviceDetailsTextArea.addEventListener('input', () => {
-                sharedDeviceDetails = deviceDetailsTextArea.value;
-                bugVerificationDeviceDetails.value = sharedDeviceDetails;
-                upgradeMdlTextField(bugVerificationDeviceDetails); // Update MDL styling
-            });
+    updateTokenAndCost(0, 0);
+  }); // End DOMContentLoaded listener
 
-            // When user types in the Bug Verification's Device Details
-            bugVerificationDeviceDetails.addEventListener('input', () => {
-                sharedDeviceDetails = bugVerificationDeviceDetails.value;
-                deviceDetailsTextArea.value = sharedDeviceDetails;
-                upgradeMdlTextField(deviceDetailsTextArea); // Update MDL styling
-            });
-        }
+  // --- Ensure tab bar styling matches our glassmorphic theme ---
+  // A small delay is necessary to ensure JS has completely finished its styling.
+  setTimeout(() => {
+    const tabBar = document.querySelector(".tab-container");
+    if (tabBar) {
+      // Directly manipulate the inline style to override defaults
+      tabBar.style.backgroundColor = "var(--card-bg)";
+      tabBar.style.backdropFilter = "blur(var(--glass-blur))";
+      tabBar.style.webkitBackdropFilter = "blur(var(--glass-blur))";
 
-        // Bug Verification Tab Event Listeners
-        if (fetchChildBugsBtn) { // Check if the button exists before adding listener
-            fetchChildBugsBtn.addEventListener('click', fetchAndDisplayChildBugs);
-            // Listen for Enter key press on the masterBugIdInput
-            bugIdInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Prevent default form submission
-                    fetchAndDisplayChildBugs();
-                }
-            });
-        }
-        if (reproducibleBtn) { // Add null check for reproducibility buttons
-            reproducibleBtn.addEventListener('click', () => addVerificationComment(true));
-        }
-        if (notReproducibleBtn) { // Add null check for reproducibility buttons
-            notReproducibleBtn.addEventListener('click', () => addVerificationComment(false));
-        }
-
-        // The real-time sync above handles updates, so we don't need a specific
-        // tab-switch update for device details anymore.
-        const tabBar = document.querySelector('.mdl-layout__tab-bar');
-        if (tabBar) {
-            tabBar.addEventListener('click', (event) => {
-                const tab = event.target.closest('.mdl-layout__tab');
-                if (tab && tab.hash === '#bug-verification-panel') {
-                    // keep this, but the input listeners are more real-time.
-                    // The core sharedDeviceDetails is the source of truth.
-                    if (bugVerificationDeviceDetails && sharedDeviceDetails) {
-                         bugVerificationDeviceDetails.value = sharedDeviceDetails;
-                         upgradeMdlTextField(bugVerificationDeviceDetails);
-                    }
-                }
-            });
-        }
-
-        // Initial MDL upgrade for all form elements to handle any pre-filled or dynamically set values
-        // It's good practice to ensure all are handled.
-        upgradeMdlTextField(deviceDetailsTextArea);
-        upgradeMdlTextField(generatedTitleDisplay);
-        upgradeMdlTextField(editableBugDescription);
-        upgradeMdlTextField(hotlistsVisibleInput);
-        
-        const bugTypeSelect = document.getElementById('bugType');
-        const prioritySelect = document.getElementById('priority');
-
-
-        // Initial check for select fields (necessary for MDL to show label correctly if value is pre-selected)
-        if (componentSelect.parentElement && componentSelect.parentElement.MaterialTextfield) componentSelect.parentElement.MaterialTextfield.checkDirty();
-        if (bugTypeSelect.parentElement && bugTypeSelect.parentElement.MaterialTextfield) bugTypeSelect.parentElement.MaterialTextfield.checkDirty();
-        if (deviceTypeSelect.parentElement && deviceTypeSelect.parentElement.MaterialTextfield) deviceTypeSelect.parentElement.MaterialTextfield.checkDirty();
-        if (applicationTypeSelect.parentElement && applicationTypeSelect.parentElement.MaterialTextfield) applicationTypeSelect.parentElement.MaterialTextfield.checkDirty();
-        if (prioritySelect.parentElement && prioritySelect.parentElement.MaterialTextfield) prioritySelect.parentElement.MaterialTextfield.checkDirty();
-
-
-        updateTokenAndCost(0, 0);
-    }); // End DOMContentLoaded listener
-    
-
-    // --- LAST RESORT: JavaScript to force tab bar transparency ---
-    // A small delay is often necessary to ensure MDL's JavaScript has
-    // completely finished its component upgrade and styling.
-    setTimeout(() => {
-        const tabBar = document.querySelector('.mdl-layout__tab-bar');
-        if (tabBar) {
-            // Directly manipulate the inline style to override MDL's defaults
-            tabBar.style.backgroundColor = 'transparent';
-            tabBar.style.backgroundImage = 'none';
-
-            // The backdrop-filter should now apply correctly via your CSS
-            // since the background is transparent.
-        }
-    }, 150);
+      // Apply glassmorphic styling to all tabs
+      const tabs = document.querySelectorAll(".tab");
+      tabs.forEach((tab) => {
+        tab.style.transition = "all var(--transition-normal) ease";
+      });
+    }
+  }, 150);
 </script>

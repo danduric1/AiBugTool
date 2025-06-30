@@ -1,179 +1,322 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <base target="_top">
-  <title>AI Bug Tool - Modern Interface</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>    
-  <?!= include('_variables') ?>
-  <?!= include('_base_layout') ?>
-  <?!= include('_panels') ?>
-  <?!= include('_mdl_customizations') ?>
-  <?!= include('_output_status') ?>
-  <?!= include('_responsive') ?>
-</head>
-<body>
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header">      
-      <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-        <a href="#bug-reporter-panel" class="mdl-layout__tab is-active">AI Bug Reporter</a>
-        <a href="#bug-verification-panel" class="mdl-layout__tab">Bug Verification</a>
-        <a href="#generate-one-pager-panel" class="mdl-layout__tab">Generate 1 Pager</a>
+  <head>
+    <base target="_top" />
+    <title>AI Bug Tool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <?!= include('_variables') ?>
+    <?!= include('_base_layout') ?>
+    <?!= include('_panels') ?>
+    <?!= include('_mdl_customizations') ?>
+    <?!= include('_output_status') ?>
+    <?!= include('_responsive') ?>
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="main-header">
+        <div class="header-title">
+          <i class="material-icons">bug_report</i>
+          AI Bug Tool
+        </div>
+
+        <div class="header-actions">
+          <div id="tokenLogger" class="token-logger">
+            <i class="material-icons">data_usage</i>
+            Tokens:<span id="tokensUsed">0</span> Cost: $<span id="costUsed"
+              >0.00</span
+            >
+          </div>
+          <div class="user-profile">
+            <img
+              id="userProfileImage"
+              src="https://placehold.co/40x40/818cf8/ffffff?text=User"
+              alt="User Profile"
+              class="profile-avatar"
+            />
+          </div>
+        </div>
+      </header>
+      
+      <div class="tab-container">
+        <div class="tab active" data-tab="bug-reporter">AI Bug Reporter</div>
+        <div class="tab" data-tab="bug-verification">Bug Verification</div>
+        <div class="tab" data-tab="one-pager">Generate 1 Pager</div>
       </div>
 
-      <div class="header-right-info">
-        <div id="tokenLogger" class="token-logger">
-          Tokens: <span id="tokensUsed">0</span> | Cost: $<span id="costUsed">0.00</span>
-        </div>
-        <div class="user-profile">
-          <img id="userProfileImage" src="https://placehold.co/40x40/cccccc/ffffff?text=User" alt="User Profile" class="profile-avatar">
-        </div>
-      </div>
-    </header>
+      <main class="main-content">
+        <div class="container">
+          <div class="tab-panel active" id="bug-reporter-panel">
+            <div class="panels-wrapper">
+              <form class="left-panel panel">
+                <div class="section-title">Bug Report Form</div>
+                <div class="form-group">
+                  <label class="input-label">Component *</label>
+                  <select
+                    class="select-input"
+                    id="component"
+                    name="component"
+                    required
+                  >
+                    <option value="" disabled>Select Component...</option>
+                    <option value="1624352" selected>
+                      ChromeOS > Aluminium > 1p & 3p Apps > 1P Apps
+                    </option>
+                    <option value="1624252">
+                      ChromeOS > Aluminium > 1p & 3p Apps > 3P Apps
+                    </option>
+                    <option value="168499">ChromeOS > App Compatibility</option>
+                    <option value="602018">
+                      ChromeOS > Chrome OS App Compatibility > Web/PWA
+                      Compatibility
+                    </option>
+                    <option value="170544">
+                      ChromeOS > Chrome OS App Compatibility > 3rd Party
+                      Developer #unreleased(Post triage)
+                    </option>
+                  </select>
+                </div>
 
-    <main class="mdl-layout__content">
-      <div class="container">
-        <section class="mdl-layout__tab-panel is-active" id="bug-reporter-panel">
-          <div class="panels-wrapper">
-            <form class="left-panel">
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width">
-                <select class="mdl-textfield__input" id="component" name="component" required>
-                  <option value="" disabled>Select Component...</option>
-                  <option value="1624352" selected>ChromeOS > Aluminium > 1p & 3p Apps > 1P Apps</option>
-                  <option value="1624252">ChromeOS > Aluminium > 1p & 3p Apps > 3P Apps</option>
-                  <option value="168499">ChromeOS > App Compatibility</option>
-                  <option value="602018">ChromeOS > Chrome OS App Compatibility > Web/PWA Compatibility</option>
-                  <option value="170544">ChromeOS > Chrome OS App Compatibility > 3rd Party Developer #unreleased(Post triage)</option>
-                </select>
-                <label class="mdl-textfield__label" for="component">Component *</label>
+                <div class="form-row">
+                  <div class="form-field-third">
+                    <label class="input-label">Issue Type *</label>
+                    <select
+                      class="select-input"
+                      id="bugType"
+                      name="bugType"
+                      required
+                    >
+                      <option value="BUG">Bug</option>
+                      <option value="FEATURE_REQUEST">Feature Request</option>
+                      <option value="PROCESS">Process</option>
+                      <option value="TASK">Task</option>
+                    </select>
+                  </div>
+
+                  <div class="form-field-third">
+                    <label class="input-label">Device Type *</label>
+                    <select
+                      class="select-input"
+                      id="deviceType"
+                      name="deviceType"
+                      required
+                    >
+                      <option value="AL">AL (Aluminium)</option>
+                      <option value="ChromeOS">ChromeOS (Generic)</option>
+                      <option value="Android">Android</option>
+                    </select>
+                  </div>
+
+                  <div class="form-field-third">
+                    <label class="input-label">Application Type *</label>
+                    <select
+                      class="select-input"
+                      id="applicationType"
+                      name="applicationType"
+                      required
+                    >
+                      <option value="" disabled selected>
+                        Select Application Type...
+                      </option>
+                      <option value="Web(Clank)">Web(Clank)</option>
+                      <option value="Application">Application</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field-half">
+                    <label class="input-label">Device Mode *</label>
+                    <select
+                      class="select-input"
+                      id="deviceMode"
+                      name="deviceMode"
+                      required
+                    >
+                      <option value="clamshell">Clamshell</option>
+                      <option value="tablet">Touchview/Tablet</option>
+                      <option value="clamshellAndTablet">
+                        Clamshell & Tablet
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-field-half">
+                    <label class="input-label">Priority *</label>
+                    <select
+                      class="select-input"
+                      id="priority"
+                      name="priority"
+                      required
+                    >
+                      <option value="P0">P0 - Critical</option>
+                      <option value="P1">P1 - High</option>
+                      <option value="P2" selected>P2 - Medium</option>
+                      <option value="P3">P3 - Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field-half">
+                    <label class="input-label">Blocking Bugs (Optional)</label>
+                    <input
+                      type="text"
+                      class="text-input"
+                      id="masterBugs"
+                      name="masterBugs"
+                      placeholder="Enter bug IDs separated by commas"
+                    />
+                  </div>
+
+                  <div class="form-field-half">
+                    <button class="btn" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); width: 100%; margin-top: 24px;">
+                      <i class="material-icons">attach_file</i>
+                      Attach GIF (Opt.)
+                    </button>
+                    <input
+                      type="file"
+                      id="gifUploadInput"
+                      accept=".gif"
+                      style="display: none"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="input-label">Hotlists</label>
+                  <div class="input-with-icon">
+                    <input
+                      type="text"
+                      class="text-input"
+                      id="hotlistsVisibleInput"
+                      placeholder="Type or click to add hotlists"
+                    />
+                    <button type="button" class="input-icon">
+                      <i class="material-icons">add</i>
+                    </button>
+                  </div>
+                  <input
+                    type="hidden"
+                    id="hotlistsHiddenInput"
+                    name="hotlistIds"
+                  />
+                </div>
+
+                <div class="hotlists-container">
+                  <div class="chips-container" id="selectedHotlists"></div>
+                      <label class="input-label">Suggested Hotlists</label>
+                      <div class="chips-container" id="hotlistSuggestions">
+                      </div>
+                </div>
+
+              <div class="form-group">
+                <label class="input-label" for="deviceDetails">Device Details *</label>
+                <textarea class="textarea-input" id="deviceDetails" name="deviceDetails" rows="8" required></textarea>
               </div>
 
-              <div class="form-row">
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label form-field-third">
-                  <select class="mdl-textfield__input" id="bugType" name="bugType" required>
-                    <option value="BUG">Bug</option>
-                    <option value="FEATURE_REQUEST">Feature Request</option>
-                    <option value="PROCESS">Process</option>
-                    <option value="TASK">Task</option>
-                  </select>
-                  <label class="mdl-textfield__label" for="bugType">Issue Type *</label>
-                </div>
-              
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label form-field-third">
-                  <select class="mdl-textfield__input" id="deviceType" name="deviceType" required>
-                    <option value="AL">AL (Aluminium)</option>
-                    <option value="ChromeOS">ChromeOS (Generic)</option>
-                    <option value="Android">Android</option>
-                  </select>
-                  <label class="mdl-textfield__label" for="deviceType">Device Type *</label>
-                </div>
-                
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label form-field-third">
-                  <select class="mdl-textfield__input" id="applicationType" name="applicationType" required>
-                    <option value="" disabled selected>Select Application Type...</option>
-                    <option value="Web(Clank)">Web(Clank)</option>
-                    <option value="Application">Application</option>
-                  </select>
-                  <label class="mdl-textfield__label" for="applicationType">Application Type *</label>
+                <div class="form-group">
+                  <label class="input-label">Describe the issue *</label>
+                  <textarea
+                    class="textarea-input"
+                    rows="3"
+                    id="command"
+                    name="command"
+                    required
+                  ></textarea>
                 </div>
 
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label form-field-third">
-                  <select class="mdl-textfield__input" id="deviceMode" name="deviceMode" required>
-                    <option value="clamshell">Clamshell</option>
-                    <option value="tablet">Touchview/Tablet</option>
-                    <option value="clamshellAndTablet">Clamshell & Tablet</option>
-                  </select>
-                  <label class="mdl-textfield__label" for="deviceMode">Device Mode *</label>
-                </div>
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label form-field-third">
-                  <select class="mdl-textfield__input" id="priority" name="priority" required>
-                    <option value="P0">P0 - Critical</option>
-                    <option value="P1">P1 - High</option>
-                    <option value="P2" selected>P2 - Medium</option>
-                    <option value="P3">P3 - Low</option>
-                  </select>
-                  <label class="mdl-textfield__label" for="priority">Priority *</label>
-                </div>
-                <div class="form-field-half file-upload-container">
-                  <label class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect file-upload-button" for="gifUploadInput">
-                    <i class="material-icons">attach_file</i> <span id="buttonLabelText">Attach GIF (Opt.)</span>
-                  </label>
-                  <input type="file" id="gifUploadInput" accept=".gif" style="display: none;" />
-                  <button id="clearGifSelection" class="mdl-button mdl-js-button mdl-button--icon clear-file-button" style="display: none;">
-                    <i class="material-icons">clear</i>
+                <div class="button-group">
+                  <button
+                    id="generateBug"
+                    class="btn btn-success"
+                    type="button"
+                  >
+                    <i class="material-icons">auto_awesome</i> Generate
+                    Description
+                  </button>
+                  <button
+                    id="reportBug"
+                    type="button"
+                    class="btn btn-primary"
+                    disabled
+                  >
+                    <i class="material-icons">bug_report</i> Report Issue
                   </button>
                 </div>
+              </form>   
+              <div class="right-panel panel">
+                <div class="section-title">Generated Description</div>
+                <div class="output-container" id="outputContainer">
+                  <div class="form-group">
+                    <label class="input-label">Generated Title</label>
+                    <input
+                      type="text"
+                      class="text-input"
+                      id="generatedTitleDisplay"
+                      readonly
+                    />
+                  </div>
+                  <textarea
+                    id="editableBugDescription"
+                    class="output-textarea"
+                    placeholder="AI-generated bug body will appear here..."
+                  ></textarea>
+                  <div class="loading-overlay" id="outputLoadingOverlay">
+                    <div class="spinner"></div>
+                  </div>
                 </div>
-
-              <div class="form-row">
-                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label form-field-half">
-                  <input class="mdl-textfield__input" type="text" id="masterBugs" name="masterBugs">
-                  <label class="mdl-textfield__label" for="masterBugs">Blocking Bugs (Optional)</label>
-                </div>
-              </div>
-
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width" id="hotlistsField">
-                <div class="mdl-textfield__input-container hotlists-container-wrapper" id="hotlistsInputArea">
-                    <input class="mdl-textfield__input" type="text" id="hotlistsVisibleInput" placeholder="Type or click to add hotlists">
-                </div>
-                <label class="mdl-textfield__label" for="hotlistsVisibleInput">Hotlists (editable)</label>
-                <input type="hidden" id="hotlistsHiddenInput" name="hotlistIds"> </div>
-              
-              <div id="hotlistChipsContainer" class="hotlist-suggestions-container">
-                  <span class="status-message status-info">Select Component, Device Type, or App Type for hotlist suggestions.</span>
-              </div>
-
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width">
-                <textarea class="mdl-textfield__input" id="deviceDetails" name="deviceDetails" rows="8"></textarea>
-                <label class="mdl-textfield__label" for="deviceDetails">Device Details *</label>
-              </div>
-
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width">
-                <textarea class="mdl-textfield__input" rows="3" id="command" name="command" required></textarea>
-                <label class="mdl-textfield__label" for="command">Describe the issue*</label>
-              </div>
-
-              <div class="button-group">
-                <button id="generateBug" class="mdl-button mdl-js-button mdl-button--raised mdl-button--success mdl-js-ripple-effect" type="button">
-                  <i class="material-icons">auto_awesome</i> Generate Description
-                </button>
-                <button id="reportBug" type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
-                  <i class="material-icons">bug_report</i> Report Issue
-                </button>
-              </div>
-            </form>
-
-            <div class="right-panel">
-              <h3>Generated Description</h3>
-              <div class="output-container" id="outputContainer">
-                <div class="mdl-textfield mdl-js-textfield is-upgraded generated-title-wrapper" style="padding-top: 0; padding-bottom: 0;">
-                  <input class="mdl-textfield__input" type="text" id="generatedTitleDisplay" readonly>
-                  <label class="mdl-textfield__label" for="generatedTitleDisplay">Generated Title</label>
-                </div>
-                <textarea id="editableBugDescription" class="mdl-textfield__input" placeholder="AI-generated bug body will appear here..."></textarea>
-                <div class="loading-overlay"> <div class="spinner"></div> </div>
-              </div>
-              <div id="statusMessage" class="mdl-typography--body-1" style="display: none;"></div>
+                <div
+                  id="statusMessage"
+                  class="status-message"
+                  style="display: none"
+                ></div>
+              </div>     
             </div>
           </div>
-        </section>
-
-        <section class="mdl-layout__tab-panel" id="bug-verification-panel">
+          <div class="tab-panel" id="bug-verification-panel">
           <?!= include('BugVerificationUI') ?>
-        </section>
-
-        <section class="mdl-layout__tab-panel" id="generate-one-pager-panel">
+        </div>
+        <div class="tab-panel" id="one-pager-panel">
           <?!= include('GenerateOnePager') ?>
-        </section>
-
-      </div>
-    </main>
-  </div>
-  <div id="toastNotificationsContainer" class="toast-notifications-container">
+        </div>
+        </div>
+      </main>
     </div>
-  <?!= include('JavaScript') ?>
-  <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
-</body>
+    <div
+      id="toastNotificationsContainer"
+      class="toast-notifications-container"
+    ></div>
+    <?!= include('JavaScript') ?>
+    <script
+      type="text/javascript"
+      src="https://apis.google.com/js/api.js?onload=onApiLoad"
+    ></script>
+    <script>
+      // Tab navigation
+      document.addEventListener("DOMContentLoaded", function () {
+        const tabs = document.querySelectorAll(".tab");
+        const tabPanels = document.querySelectorAll(".tab-panel");
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            // Remove active class from all tabs and panels
+            tabs.forEach((t) => t.classList.remove("active"));
+            tabPanels.forEach((p) => p.classList.remove("active"));
+
+            // Add active class to clicked tab and corresponding panel
+            tab.classList.add("active");
+            const panelId = tab.getAttribute("data-tab") + "-panel";
+            document.getElementById(panelId).classList.add("active");
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
