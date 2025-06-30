@@ -1,0 +1,177 @@
+<style>
+  /* Toast Notifications Container */
+  .toast-notifications-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+    max-width: 350px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding-right: 5px; /* Add padding for scrollbar */
+    /* Hide scrollbar when not needed */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .toast-notifications-container::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .toast-notifications-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .toast-notifications-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+  }
+
+  /* Toast Notification */
+  .toast-notification {
+    position: relative;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 100%;
+    min-width: 200px;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Toast Notification types */
+  .toast-bg-info {
+    background-color: rgba(33, 150, 243, 0.9);
+    border-left: 4px solid #1976d2;
+  }
+
+  .toast-bg-success {
+    background-color: rgba(76, 175, 80, 0.9);
+    border-left: 4px solid #388e3c;
+  }
+
+  .toast-bg-warning {
+    background-color: rgba(255, 152, 0, 0.9);
+    border-left: 4px solid #f57c00;
+  }
+
+  .toast-bg-error {
+    background-color: rgba(244, 67, 54, 0.9);
+    border-left: 4px solid #d32f2f;
+  }
+
+  /* Toast with actions gets more padding at bottom */
+  .toast-notification.has-action {
+    padding-bottom: 8px;
+  }
+
+  /* Toast message text */
+  .toast-message-text {
+    flex-grow: 1;
+    padding-right: 24px; /* Space for the close button */
+    word-break: break-word;
+  }
+
+  /* Toast close button */
+  .toast-close-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .toast-close-button:hover,
+  .toast-close-button:focus {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Actions container */
+  .toast-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  /* Action buttons */
+  .toast-action-button {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .toast-action-button:hover,
+  .toast-action-button:focus {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Toast animation */
+  .toast-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  /* Toast spinner for loading states */
+  .toast-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: toast-spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes toast-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Mobile optimization */
+  @media screen and (max-width: 480px) {
+    .toast-notifications-container {
+      bottom: 10px;
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+
+    .toast-notification {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+</style>

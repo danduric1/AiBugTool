@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <title>Toast Notification Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <?!= include('_variables') ?>
+    <?!= include('_base_layout') ?>
+    <?!= include('_mdl_customizations') ?>
+    <?!= include('_toast_notifications') ?>
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="main-header">
+        <div class="header-title">
+          <i class="material-icons">notifications</i>
+          Toast Notification Demo
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="container">
+          <div class="panel" style="max-width: 800px; margin: 0 auto">
+            <h2>Toast Notification Examples</h2>
+            <p>
+              Click the buttons below to see different types of toast
+              notifications.
+            </p>
+
+            <div class="button-group">
+              <button id="infoToastBtn" class="btn btn-info">
+                <i class="material-icons">info</i> Info Toast
+              </button>
+              <button id="successToastBtn" class="btn btn-success">
+                <i class="material-icons">check_circle</i> Success Toast
+              </button>
+              <button id="warningToastBtn" class="btn btn-warning">
+                <i class="material-icons">warning</i> Warning Toast
+              </button>
+              <button id="errorToastBtn" class="btn btn-error">
+                <i class="material-icons">error</i> Error Toast
+              </button>
+            </div>
+
+            <h3 style="margin-top: 30px">Advanced Toast Features</h3>
+            <div class="button-group">
+              <button id="persistentToastBtn" class="btn">
+                <i class="material-icons">timer_off</i> Persistent Toast
+              </button>
+              <button id="actionToastBtn" class="btn">
+                <i class="material-icons">touch_app</i> Toast with Actions
+              </button>
+              <button id="updateToastBtn" class="btn">
+                <i class="material-icons">update</i> Updatable Toast
+              </button>
+              <button id="timerToastBtn" class="btn">
+                <i class="material-icons">timer</i> Elapsed Time Toast
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div
+      id="toastNotificationsContainer"
+      class="toast-notifications-container"
+    ></div>
+
+    <?!= include('ToastNotificationService') ?>
+    <?!= include('ToastIntegration') ?>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize toast service
+        if (!window.toastService) {
+          window.toastService = new ToastNotificationService(
+            "toastNotificationsContainer"
+          );
+          console.log("Toast notification service initialized for demo");
+        }
+
+        // Basic toast examples
+        document
+          .getElementById("infoToastBtn")
+          .addEventListener("click", function () {
+            showToast("This is an info toast notification", "info", 5000);
+          });
+
+        document
+          .getElementById("successToastBtn")
+          .addEventListener("click", function () {
+            showToast("Operation completed successfully!", "success", 5000);
+          });
+
+        document
+          .getElementById("warningToastBtn")
+          .addEventListener("click", function () {
+            showToast(
+              "Warning: This action may have consequences",
+              "warning",
+              5000
+            );
+          });
+
+        document
+          .getElementById("errorToastBtn")
+          .addEventListener("click", function () {
+            showToast("Error: Something went wrong", "error", 5000);
+          });
+
+        // Advanced toast examples
+        document
+          .getElementById("persistentToastBtn")
+          .addEventListener("click", function () {
+            const toastId = showToast(
+              "This is a persistent toast that won't auto-close",
+              "info",
+              null, // null duration makes it persistent
+              "persistent-demo-toast"
+            );
+
+            // Add a timeout to remove it after 10 seconds for demo purposes
+            setTimeout(() => {
+              removeToast(toastId);
+              showToast(
+                "Persistent toast was removed after 10 seconds",
+                "info",
+                3000
+              );
+            }, 10000);
+          });
+
+        document
+          .getElementById("actionToastBtn")
+          .addEventListener("click", function () {
+            showToast(
+              "This toast has action buttons",
+              "info",
+              null,
+              "action-demo-toast",
+              [
+                {
+                  text: "Accept",
+                  onClick: function () {
+                    showToast("You clicked Accept", "success", 3000);
+                    removeToast("action-demo-toast");
+                  },
+                },
+                {
+                  text: "Dismiss",
+                  onClick: function () {
+                    showToast("You clicked Dismiss", "info", 3000);
+                    removeToast("action-demo-toast");
+                  },
+                },
+              ]
+            );
+          });
+
+        let updatableToastId = null;
+        document
+          .getElementById("updateToastBtn")
+          .addEventListener("click", function () {
+            if (!updatableToastId) {
+              updatableToastId = showToast(
+                "This toast can be updated",
+                "info",
+                null,
+                "updatable-demo-toast"
+              );
+
+              // Update the toast after 2 seconds
+              setTimeout(() => {
+                updateToast(updatableToastId, {
+                  message: "Toast content updated!",
+                  type: "success",
+                });
+
+                // Update again after another 2 seconds
+                setTimeout(() => {
+                  updateToast(updatableToastId, {
+                    message: "Final update with actions",
+                    actions: [
+                      {
+                        text: "Close",
+                        onClick: function () {
+                          removeToast(updatableToastId);
+                          updatableToastId = null;
+                        },
+                      },
+                    ],
+                  });
+                }, 2000);
+              }, 2000);
+            } else {
+              showToast(
+                "An updatable toast is already active",
+                "warning",
+                3000
+              );
+            }
+          });
+
+        document
+          .getElementById("timerToastBtn")
+          .addEventListener("click", function () {
+            const processId = "elapsed-time-demo-" + Date.now();
+            startElapsedTimeUpdater(processId, "Process running...", "info");
+
+            // Stop the timer after 5 seconds
+            setTimeout(() => {
+              stopElapsedTimeUpdater(true, {
+                message: "Process completed successfully!",
+                type: "success",
+                duration: 3000,
+              });
+            }, 5000);
+          });
+      });
+    </script>
+  </body>
+</html>
