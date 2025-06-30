@@ -1,287 +1,428 @@
 <style>
-    /* --- RIGHT PANEL & OUTPUT (Dark Mode Only) --- */
-    .output-container {
-        position: relative;
-        flex-grow: 1; display: flex; flex-direction: column; gap: 0.75rem;
-    }
-    /* Wrapper for title field to control spacing */
-    .generated-title-wrapper.mdl-textfield {
-        padding-top: 0;
-        margin-bottom: 0;
-    }
-    #generatedTitleDisplay {
-        font-weight: bold;
-        border-bottom: none !important;
-        color: var(--text-color);
-        padding: 4px 0 !important;
-        background-color: transparent; /* Ensure transparent */
-    }
-    #generatedTitleDisplay + .mdl-textfield__label { top: 4px !important; }
+  /* --- RIGHT PANEL & OUTPUT --- */
+  .output-container {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: var(--glass-bg);
+    border-radius: var(--card-radius);
+    border: var(--glass-border);
+    padding: var(--spacing-md);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+  }
+  /* Title styling */
+  #generatedTitleDisplay {
+    font-weight: 600;
+    color: var(--text-color);
+    padding: 12px 16px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: var(--glass-border);
+    border-radius: var(--form-radius);
+    width: 100%;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+  }
 
-    #editableBugDescription {
-      flex-grow: 1;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.875rem;
-      line-height: 1.6;
-      padding: 0.75rem;
-      border: 1px solid var(--border-color);
-      border-radius: 8px; /* More rounded */
-      box-sizing: border-box;
-      resize: vertical;
-      min-height: 250px;
-      background-color: var(--input-bg-color); /* Use consolidated variable */
-      color: var(--text-color);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-    }
-    #editableBugDescription:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.5); /* Softer, broader shadow, from _dark_mode.html */
-        outline: none;
-    }
-    #deviceDetails {
-        font-family: 'Roboto Mono', monospace;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        min-height: 150px;
-    }
+  .output-textarea {
+    flex-grow: 1;
+    font-family: "Poppins", "Roboto Mono", monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    padding: 1rem;
+    border: var(--glass-border);
+    border-radius: var(--form-radius);
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 250px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    transition: all var(--transition-normal) ease;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
-    /* --- LOADING & STATUS --- */
-    .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(var(--background-panel-rgb), 0.6); /* Slightly more opaque for loading */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 50;
-        transition: opacity 0.3s ease;
-        opacity: 0;
-        pointer-events: none;
-    }
-    .output-container.loading .loading-overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
-    .spinner {
-        border: 4px solid rgba(255, 255, 255, 0.1); /* Adjusted for dark mode from _dark_mode.html */
-        border-left-color: var(--primary-color);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+  .output-textarea:focus {
+    border-color: var(--primary-light);
+    background-color: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2),
+      inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    outline: none;
+  }
 
-    #status {
-        margin-top: 1rem;
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        display: none;
-        word-break: break-word;
-    }
-    #status.success {
-        background-color: var(--success-bg);
-        color: var(--success-text);
-        border: 1px solid var(--success-border);
-    }
-    #status.error {
-        background-color: var(--error-bg);
-        color: var(--error-text);
-        border: 1px solid var(--error-border);
-    }
-    #status a {
-        color: inherit;
-        text-decoration: underline;
-    }
-    /* --- Pure CSS for Toast Messages --- */
-    #toastNotificationsContainer {
-        position: fixed;
-        bottom: 1rem; /* Equivalent to Tailwind's bottom-4 */
-        left: 50%;
-        transform: translateX(-50%) translateY(1rem); /* Hidden state: translate down 1rem */
-        padding: 0.75rem; /* Equivalent to Tailwind's p-3 */
-        border-radius: 0.5rem; /* Equivalent to Tailwind's rounded-lg */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Equivalent to Tailwind's shadow-lg */
-        color: white; /* Equivalent to Tailwind's text-white */
-        transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Smooth transition */
-        opacity: 0; /* Hidden by default */
-        pointer-events: none; /* Prevents interaction when hidden */
-        z-index: 50;
-        display: flex;
-        align-items: center; /* Equivalent to Tailwind's items-center */
-        justify-content: space-between; /* Equivalent to Tailwind's justify-between */
-        min-width: 300px; /* Equivalent to Tailwind's min-w-[300px] */
-        max-width: 400px; /* Equivalent to Tailwind's max-w-sm (approx) */
-        min-height: 48px; /* Ensure minimum height */
-    }
-    
-    #toastNotificationsContainer.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0); /* Visible state: no translation */
-        pointer-events: auto; /* Allows interaction when visible */
-    }
-    
-    #toastCloseButton {
-        margin-left: 1rem; /* Equivalent to Tailwind's ml-4 */
-        color: rgba(255, 255, 255, 0.7); /* Lighter text for close button */
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1.5rem; /* Adjust icon size if needed */
-        line-height: 1; /* For vertical alignment */
-        padding: 0;
-    }
-    
-    #toastCloseButton:hover {
-        color: white;
-    }
+  /* Glassmorphic typing cursor effect */
+  .output-textarea.typing {
+    position: relative;
+  }
 
-    /* Container for all toast notifications */
+  .output-textarea.typing::after {
+    content: "|";
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    color: var(--primary-light);
+    font-weight: bold;
+    animation: blink 0.8s infinite;
+    text-shadow: var(--neon-primary);
+    opacity: 0.8;
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+  #deviceDetails {
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    min-height: 150px;
+  }
+
+  /* --- LOADING & STATUS --- */
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    transition: opacity var(--transition-normal) ease;
+    opacity: 0;
+    pointer-events: none;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: var(--card-radius);
+  }
+  .output-container.loading .loading-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-light);
+    animation: spin 1s linear infinite;
+    box-shadow: var(--neon-primary);
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Status message styling */
+  .status-message {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+    display: none;
+    word-break: break-word;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .status-message.success {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+    border-left: 3px solid var(--success-color);
+  }
+
+  .status-message.error {
+    background-color: var(--error-bg);
+    color: var(--error-text);
+    border-left: 3px solid var(--error-color);
+  }
+
+  .status-message.info {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+    border-left: 3px solid var(--info-color);
+  }
+
+  .status-message a {
+    color: inherit;
+    text-decoration: underline;
+  }
+  /* --- Pure CSS for Toast Messages --- */
+  #toastNotificationsContainer {
+    position: fixed;
+    bottom: 1rem; /* Equivalent to Tailwind's bottom-4 */
+    left: 50%;
+    transform: translateX(-50%) translateY(1rem); /* Hidden state: translate down 1rem */
+    padding: 0.75rem; /* Equivalent to Tailwind's p-3 */
+    border-radius: 0.5rem; /* Equivalent to Tailwind's rounded-lg */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Equivalent to Tailwind's shadow-lg */
+    color: white; /* Equivalent to Tailwind's text-white */
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Smooth transition */
+    opacity: 0; /* Hidden by default */
+    pointer-events: none; /* Prevents interaction when hidden */
+    z-index: 50;
+    display: flex;
+    align-items: center; /* Equivalent to Tailwind's items-center */
+    justify-content: space-between; /* Equivalent to Tailwind's justify-between */
+    min-width: 300px; /* Equivalent to Tailwind's min-w-[300px] */
+    max-width: 400px; /* Equivalent to Tailwind's max-w-sm (approx) */
+    min-height: 48px; /* Ensure minimum height */
+  }
+
+  #toastNotificationsContainer.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0); /* Visible state: no translation */
+    pointer-events: auto; /* Allows interaction when visible */
+  }
+
+  #toastCloseButton {
+    margin-left: 1rem; /* Equivalent to Tailwind's ml-4 */
+    color: rgba(255, 255, 255, 0.7); /* Lighter text for close button */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem; /* Adjust icon size if needed */
+    line-height: 1; /* For vertical alignment */
+    padding: 0;
+  }
+
+  #toastCloseButton:hover {
+    color: white;
+  }
+
+  /* Container for all toast notifications */
+  .toast-notifications-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: var(--toast-z-index);
+    display: flex;
+    flex-direction: column-reverse; /* Stack new toasts on top */
+    gap: 10px;
+    align-items: flex-end;
+    pointer-events: none; /* Allow clicks to pass through the container */
+    max-height: 80vh; /* Limit the height to avoid filling the entire screen */
+    overflow-y: auto; /* Enable scrolling if many toasts appear */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: none; /* Hide scrollbar on Firefox */
+  }
+
+  .toast-notifications-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar on Chrome/Safari/Edge */
+  }
+
+  /* Individual toast notification */
+  .toast-notification {
+    background-color: var(--toast-bg-info); /* Default color */
+    color: var(--toast-text-color);
+    padding: var(--toast-padding);
+    border-radius: var(--toast-border-radius);
+    box-shadow: var(--toast-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 250px;
+    max-width: var(--toast-max-width);
+    word-break: break-word; /* Handle long text */
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity var(--toast-transition-duration) ease-out,
+      transform var(--toast-transition-duration) ease-out;
+    pointer-events: all; /* Make toasts interactive */
+    font-size: var(--toast-font-size);
+    line-height: var(--toast-line-height);
+    margin-left: auto; /* Right-align toasts */
+    position: relative; /* For potential inner elements positioning */
+    backdrop-filter: blur(2px); /* Subtle glass effect */
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+  }
+
+  /* Toast appearance animation */
+  .toast-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Toast spinner for "working" states */
+  .toast-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  /* Message text container */
+  .toast-message-text {
+    flex-grow: 1;
+    padding-right: 8px; /* Space for close button */
+    display: flex;
+    align-items: center;
+  }
+
+  /* Close button */
+  .toast-close-button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    margin-left: 8px;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+  }
+
+  .toast-close-button:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Focus styles for accessibility */
+  .toast-close-button:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+  }
+
+  /* Toast background colors using CSS variables */
+  .toast-bg-info {
+    background-color: var(--toast-bg-info);
+  }
+
+  .toast-bg-success {
+    background-color: var(--toast-bg-success);
+  }
+
+  .toast-bg-error {
+    background-color: var(--toast-bg-error);
+  }
+
+  .toast-bg-warning {
+    background-color: var(--toast-bg-warning);
+  }
+
+  /* Animation for spinner */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Toast with actions */
+  .toast-notification.has-action {
+    padding-bottom: 8px; /* Less padding at bottom when there are action buttons */
+  }
+
+  /* Container for action buttons */
+  .toast-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  /* Action button styling */
+  .toast-action-button {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .toast-action-button:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
     .toast-notifications-container {
-        position: fixed;
-        bottom: 20px; /* Adjust as needed */
-        right: 20px; /* Adjust as needed */
-        z-index: 1000; /* Ensure it's above most content */
-        display: flex;
-        flex-direction: column-reverse; /* Stack new toasts on top, pushing old ones down */
-        gap: 10px; /* Space between toasts */
-        align-items: flex-end; /* Align toasts to the right */
-        pointer-events: none; /* Allow clicks to pass through the container to elements underneath */
+      right: 10px;
+      left: 10px;
+      align-items: stretch; /* Full width on mobile */
     }
 
-    /* Individual toast message styling */
-    .toast-message {
-        background-color: #333; /* Default dark background */
-        color: #fff;
-        padding: 10px 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        min-width: 250px;
-        max-width: 350px;
-        word-break: break-word; /* Allow long messages to break */
-        opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-        pointer-events: all; /* Make individual toasts clickable/interactable */
+    .toast-notification {
+      max-width: none; /* Full width */
+      width: 100%;
+      margin-left: 0;
     }
+  }
 
-    .toast-message.toast-show {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  /* --- Pure CSS for Loading Overlay --- */
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.75); /* Semi-transparent white */
+    z-index: 40;
+    border-radius: 0.5rem; /* Consistent with parent section-container */
+    /* Add this if you want it to hide by default and be controlled by JS */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  }
 
-    .toast-message.toast-hide {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+  .loading-overlay.show {
+    visibility: visible;
+    opacity: 1;
+  }
 
-    /* Toast types */
-    .toast-message.toast-info {
-        background-color: #2196f3; /* Blue */
-    }
+  /* Spinner animation */
+  .loading-spinner {
+    border-radius: 50%;
+    height: 2rem; /* Equivalent to Tailwind's h-8 */
+    width: 2rem; /* Equivalent to Tailwind's w-8 */
+    border-bottom: 2px solid #374151; /* Dark gray for the spinning part */
+    border-top: 2px solid transparent;
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
+    animation: spin 1s linear infinite;
+  }
 
-    .toast-message.toast-success {
-        background-color: #4CAF50; /* Green */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
     }
-
-    .toast-message.toast-error {
-        background-color: #f44336; /* Red */
+    100% {
+      transform: rotate(360deg);
     }
-
-    .toast-message-text {
-        flex-grow: 1;
-        padding-right: 10px; /* Space for close button */
-        display: flex;
-        align-items: center; /* Align spinner and text */
-    }
-
-    .toast-close-button {
-        background: none;
-        border: none;
-        color: inherit;
-        font-size: 16px;
-        cursor: pointer;
-        margin-left: 10px;
-        padding: 0;
-        line-height: 1;
-    }
-
-    /* Spinner for AI is working... toast */
-    .toast-message .spinner {
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-right: 10px;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Toast background colors */
-    .toast-bg-info {
-        background-color: #374151; /* Equivalent to Tailwind's bg-gray-800 */
-    }
-    .toast-bg-success {
-        background-color: #22c55e; /* Equivalent to Tailwind's bg-green-600 */
-    }
-    .toast-bg-error {
-        background-color: #ef4444; /* Equivalent to Tailwind's bg-red-600 */
-    }
-    .toast-bg-warning {
-        background-color: #f97316; /* Equivalent to Tailwind's bg-orange-600 */
-    }
-    
-    /* --- Pure CSS for Loading Overlay --- */
-    .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(255, 255, 255, 0.75); /* Semi-transparent white */
-        z-index: 40;
-        border-radius: 0.5rem; /* Consistent with parent section-container */
-        /* Add this if you want it to hide by default and be controlled by JS */
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-    }
-    
-    .loading-overlay.show {
-        visibility: visible;
-        opacity: 1;
-    }
-    
-    /* Spinner animation */
-    .loading-spinner {
-        border-radius: 50%;
-        height: 2rem; /* Equivalent to Tailwind's h-8 */
-        width: 2rem; /* Equivalent to Tailwind's w-8 */
-        border-bottom: 2px solid #374151; /* Dark gray for the spinning part */
-        border-top: 2px solid transparent;
-        border-left: 2px solid transparent;
-        border-right: 2px solid transparent;
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+  }
 </style>

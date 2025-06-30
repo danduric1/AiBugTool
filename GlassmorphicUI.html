@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <title>AI Bug Tool - Glassmorphic Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <style>
+      :root {
+        /* Main theme colors */
+        --primary-color: #6366f1;
+        --primary-light: #818cf8;
+        --primary-dark: #4f46e5;
+        --accent-color: #10b981;
+        --accent-light: #34d399;
+        --accent-dark: #059669;
+
+        /* Background and surface colors */
+        --bg-gradient-1: #0f172a;
+        --bg-gradient-2: #1e293b;
+        --bg-gradient-3: #0f1729;
+        --surface-color: rgba(255, 255, 255, 0.1);
+        --card-bg: rgba(16, 20, 34, 0.6);
+
+        /* Text colors */
+        --text-primary: rgba(255, 255, 255, 0.9);
+        --text-secondary: rgba(255, 255, 255, 0.6);
+        --text-disabled: rgba(255, 255, 255, 0.4);
+
+        /* Glassmorphism variables */
+        --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+        --glass-blur: 12px;
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+        --card-radius: 16px;
+        --btn-radius: 10px;
+        --form-radius: 8px;
+
+        /* Status colors */
+        --success-color: #10b981;
+        --error-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+
+        /* Toast Notification Variables */
+        --toast-bg-info: rgba(59, 130, 246, 0.8);
+        --toast-bg-success: rgba(16, 185, 129, 0.8);
+        --toast-bg-error: rgba(239, 68, 68, 0.8);
+        --toast-bg-warning: rgba(245, 158, 11, 0.8);
+        --toast-text-color: #ffffff;
+        --toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --toast-border-radius: 12px;
+        --toast-z-index: 1000;
+        --toast-font-size: 0.95rem;
+        --toast-line-height: 1.5;
+        --toast-max-width: 350px;
+        --toast-padding: 14px 18px;
+        --toast-transition-duration: 0.3s;
+
+        /* Sizing and spacing */
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 20px;
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 16px;
+        --spacing-lg: 24px;
+        --spacing-xl: 32px;
+        --spacing-xxl: 48px;
+
+        /* Animation durations */
+        --transition-fast: 0.2s;
+        --transition-normal: 0.3s;
+        --transition-slow: 0.5s;
+
+        /* Neon glow effects */
+        --neon-primary: 0 0 5px rgba(99, 102, 241, 0.5),
+          0 0 20px rgba(99, 102, 241, 0.3);
+        --neon-accent: 0 0 5px rgba(16, 185, 129, 0.5),
+          0 0 20px rgba(16, 185, 129, 0.3);
+        --neon-error: 0 0 5px rgba(239, 68, 68, 0.5),
+          0 0 20px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Global reset and base styles */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(
+          135deg,
+          var(--bg-gradient-1),
+          var(--bg-gradient-2),
+          var(--bg-gradient-3)
+        );
+        background-attachment: fixed;
+        color: var(--text-primary);
+        min-height: 100vh;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Layout styles */
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .main-header {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border-bottom: var(--glass-border);
+        padding: var(--spacing-md) var(--spacing-xl);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(
+          90deg,
+          var(--primary-light),
+          var(--accent-light)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: var(--neon-primary);
+        letter-spacing: 0.5px;
+      }
+
+      .header-title i {
+        margin-right: var(--spacing-sm);
+        font-size: 1.8rem;
+        color: var(--primary-light);
+        text-shadow: var(--neon-primary);
+        -webkit-text-fill-color: var(--primary-light);
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+      }
+
+      .token-logger {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        border: var(--glass-border);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .token-logger i {
+        margin-right: var(--spacing-xs);
+        font-size: 16px;
+        color: var(--primary-light);
+      }
+
+      .token-logger span {
+        color: var(--accent-light);
+        font-weight: 500;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+      }
+
+      .profile-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--primary-light);
+        box-shadow: var(--neon-primary);
+      }
+
+      /* Tab navigation */
+      .tab-container {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        border-bottom: var(--glass-border);
+      }
+
+      .tab-container::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab {
+        padding: var(--spacing-md) var(--spacing-lg);
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+        white-space: nowrap;
+        transition: color var(--transition-normal) ease;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+      }
+
+      .tab.active {
+        color: var(--text-primary);
+      }
+
+      .tab.active:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-light),
+          var(--accent-light)
+        );
+        box-shadow: var(--neon-primary);
+      }
+
+      .tab:hover {
+        color: var(--text-primary);
+      }
+
+      /* Main content area */
+      .main-content {
+        flex: 1;
+        padding: var(--spacing-xl);
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      .tab-panel.active {
+        display: block;
+        animation: fadeIn var(--transition-normal) ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Panel layout */
+      .panels-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xl);
+      }
+
+      .panel {
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        box-shadow: var(--glass-shadow);
+        border: var(--glass-border);
+        padding: var(--spacing-lg);
+        overflow: hidden;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .panel-scrollable {
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      /* Section titles */
+      .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+        background: linear-gradient(
+          90deg,
+          var(--primary-light),
+          var(--accent-light)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0.5px;
+      }
+
+      .sub-section-title {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+      /* Form styles */
+      .form-group {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+      }
+
+      .form-field-full {
+        flex: 1 0 100%;
+      }
+
+      .form-field-half {
+        flex: 1 0 calc(50% - var(--spacing-md));
+      }
+
+      .form-field-third {
+        flex: 1 0 calc(33.33% - var(--spacing-md));
+      }
+
+      .input-label {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      .text-input,
+      .select-input,
+      .textarea-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: var(--glass-border);
+        border-radius: var(--form-radius);
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: all var(--transition-normal) ease;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .text-input:focus,
+      .select-input:focus,
+      .textarea-input:focus {
+        outline: none;
+        border-color: var(--primary-light);
+        background-color: rgba(255, 255, 255, 0.07);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      }
+
+      .textarea-input {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+
+      /* Input with icon */
+      .input-with-icon {
+        position: relative;
+      }
+
+      .input-with-icon .text-input {
+        padding-right: 48px;
+      }
+
+      .input-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color var(--transition-normal) ease;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .input-icon:hover {
+        color: var(--primary-light);
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Button styles */
+      .button-group {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+      }
+
+      .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: var(--btn-radius);
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-normal) ease;
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.5px;
+      }
+
+      .btn i {
+        margin-right: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        box-shadow: var(--neon-primary);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: var(--glass-border);
+        color: var(--text-primary);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .btn-success {
+        background: linear-gradient(
+          135deg,
+          var(--accent-color),
+          var(--accent-dark)
+        );
+        color: white;
+        box-shadow: var(--neon-accent);
+      }
+
+      .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+      }
+
+      .btn-error {
+        background: linear-gradient(135deg, var(--error-color), #dc2626);
+        color: white;
+        box-shadow: var(--neon-error);
+      }
+
+      .btn-error:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none;
+      }
+
+      .btn-icon {
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: var(--glass-border);
+      }
+
+      .btn-icon i {
+        margin-right: 0;
+      }
+
+      .btn-icon:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      /* Button shine effect */
+      .btn:after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        transform: rotate(45deg);
+        transition: all 0.5s ease;
+        opacity: 0;
+      }
+
+      .btn:hover:after {
+        animation: shine 1.5s ease;
+      }
+
+      @keyframes shine {
+        0% {
+          opacity: 0;
+          transform: rotate(45deg) translate(-100%, -100%);
+        }
+        50% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 0;
+          transform: rotate(45deg) translate(100%, 100%);
+        }
+      }
+
+      /* File upload button */
+      .file-upload {
+        position: relative;
+        display: inline-block;
+      }
+
+      .file-upload input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .upload-label {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        border-radius: var(--form-radius);
+        cursor: pointer;
+        transition: all var(--transition-normal) ease;
+        border: var(--glass-border);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .upload-label:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .upload-label i {
+        margin-right: 8px;
+      }
+
+      /* Hotlists styles */
+      .hotlists-container {
+        margin-top: var(--spacing-md);
+      }
+
+      .chips-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+        margin-top: var(--spacing-sm);
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        border: var(--glass-border);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        transition: all var(--transition-normal) ease;
+      }
+
+      .chip-suggestion {
+        cursor: pointer;
+      }
+
+      .chip-suggestion:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .chip-selected {
+        background: rgba(99, 102, 241, 0.3);
+        border-color: var(--primary-light);
+        box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+      }
+
+      .chip-delete {
+        margin-left: 8px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity var(--transition-normal) ease;
+        line-height: 1;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .chip-delete:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Output section styles */
+      .output-container {
+        position: relative;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--border-radius-md);
+        border: var(--glass-border);
+        overflow: hidden;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .output-title {
+        padding: var(--spacing-md);
+        border-bottom: var(--glass-border);
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.03);
+        font-weight: 600;
+      }
+
+      .output-content {
+        padding: var(--spacing-md);
+        min-height: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .output-textarea {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        padding: var(--spacing-md);
+        border: none;
+        resize: none;
+        background-color: transparent;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      .output-textarea:focus {
+        outline: none;
+      }
+
+      /* Loading spinner */
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(15, 23, 42, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--transition-normal) ease;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .loading-overlay.show {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary-light);
+        animation: spin 1s linear infinite;
+        box-shadow: var(--neon-primary);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Bug list styles */
+      .bug-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .bug-item {
+        padding: var(--spacing-md);
+        border-bottom: var(--glass-border);
+        cursor: pointer;
+        transition: all var(--transition-normal) ease;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        background: rgba(255, 255, 255, 0.03);
+        margin-bottom: var(--spacing-sm);
+        border-radius: var(--border-radius-sm);
+      }
+
+      .bug-item:hover {
+        background: rgba(255, 255, 255, 0.07);
+        transform: translateY(-2px);
+      }
+
+      .bug-item.active {
+        background: rgba(99, 102, 241, 0.15);
+        border-left: 3px solid var(--primary-light);
+        box-shadow: var(--neon-primary);
+      }
+
+      .bug-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .bug-title {
+        font-weight: 500;
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .bug-id {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+
+      .bug-type {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        letter-spacing: 0.5px;
+        font-weight: 600;
+      }
+
+      .bug-type-platform {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
+      .bug-type-app {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      /* Bug details */
+      .bug-details {
+        margin-top: var(--spacing-lg);
+      }
+
+      .section-divider {
+        margin: var(--spacing-md) 0;
+        border: none;
+        border-top: var(--glass-border);
+      }
+
+      .ai-summary {
+        background: rgba(255, 255, 255, 0.05);
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius-sm);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        border: var(--glass-border);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      /* Accordion */
+      .accordion {
+        margin-top: var(--spacing-md);
+        border: var(--glass-border);
+        border-radius: var(--border-radius-sm);
+        overflow: hidden;
+      }
+
+      .accordion-header {
+        padding: var(--spacing-md);
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background var(--transition-normal) ease;
+      }
+
+      .accordion-header:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .accordion-title {
+        font-weight: 500;
+        margin: 0;
+      }
+
+      .accordion-icon {
+        transition: transform var(--transition-normal) ease;
+      }
+
+      .accordion.open .accordion-icon {
+        transform: rotate(180deg);
+      }
+
+      .accordion-content {
+        padding: var(--spacing-md);
+        display: none;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+      }
+
+      .accordion.open .accordion-content {
+        display: block;
+        animation: slideDown var(--transition-normal) ease;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Toast notification container */
+      .toast-notifications-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: var(--toast-z-index);
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 10px;
+        align-items: flex-end;
+        pointer-events: none;
+        max-height: 80vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .toast-notifications-container::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* Individual toast notification */
+      .toast-notification {
+        background-color: var(--toast-bg-info);
+        color: var(--toast-text-color);
+        padding: var(--toast-padding);
+        border-radius: var(--toast-border-radius);
+        box-shadow: var(--toast-shadow);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 250px;
+        max-width: var(--toast-max-width);
+        word-break: break-word;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity var(--toast-transition-duration) ease-out,
+          transform var(--toast-transition-duration) ease-out;
+        pointer-events: all;
+        font-size: var(--toast-font-size);
+        line-height: var(--toast-line-height);
+        margin-left: auto;
+        position: relative;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: var(--glass-border);
+      }
+
+      /* Toast appearance animation */
+      .toast-notification.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      /* Toast spinner for "working" states */
+      .toast-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      /* Message text container */
+      .toast-message-text {
+        flex-grow: 1;
+        padding-right: 8px;
+        display: flex;
+        align-items: center;
+      }
+
+      /* Close button */
+      .toast-close-button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        margin-left: 8px;
+        transition: all var(--transition-normal) ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        width: 28px;
+        border-radius: 50%;
+      }
+
+      .toast-close-button:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Toast background colors */
+      .toast-bg-info {
+        background-color: var(--toast-bg-info);
+      }
+
+      .toast-bg-success {
+        background-color: var(--toast-bg-success);
+      }
+
+      .toast-bg-error {
+        background-color: var(--toast-bg-error);
+      }
+
+      .toast-bg-warning {
+        background-color: var(--toast-bg-warning);
+      }
+
+      /* Toast with actions */
+      .toast-notification.has-action {
+        padding-bottom: 8px;
+      }
+
+      /* Container for action buttons */
+      .toast-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+        gap: 8px;
+      }
+
+      /* Action button styling */
+      .toast-action-button {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color var(--transition-normal) ease;
+        letter-spacing: 0.5px;
+      }
+
+      .toast-action-button:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 1024px) {
+        .panels-wrapper {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-md);
+        }
+
+        .main-content {
+          padding: var(--spacing-md);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header-actions {
+          gap: var(--spacing-xs);
+        }
+
+        .token-logger {
+          font-size: 0.8rem;
+          padding: 5px 10px;
+        }
+
+        .form-field-third,
+        .form-field-half {
+          flex: 1 0 100%;
+        }
+
+        .button-group {
+          flex-direction: column;
+        }
+
+        .button-group .btn {
+          width: 100%;
+        }
+
+        .main-content {
+          padding: var(--spacing-sm);
+        }
+
+        .main-header {
+          padding: var(--spacing-sm);
+        }
+
+        .tab {
+          padding: var(--spacing-sm) var(--spacing-md);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="main-header">
+        <h1 class="header-title">
+          <i class="material-icons">bug_report</i>
+          AI Bug Tool
+        </h1>
+        <div class="header-actions">
+          <div class="token-logger">
+            <i class="material-icons">data_usage</i>
+            Tokens: <span id="tokensUsed">0</span> | Cost: $<span id="costUsed"
+              >0.00</span
+            >
+          </div>
+          <div class="user-profile">
+            <img
+              id="userProfileImage"
+              src="https://placehold.co/40x40/818cf8/ffffff?text=User"
+              alt="User Profile"
+              class="profile-avatar"
+            />
+          </div>
+        </div>
+      </header>
+
+      <div class="tab-container">
+        <div class="tab active" data-tab="bug-reporter">AI Bug Reporter</div>
+        <div class="tab" data-tab="bug-verification">Bug Verification</div>
+        <div class="tab" data-tab="one-pager">Generate 1 Pager</div>
+      </div>
+
+      <main class="main-content">
+        <!-- Bug Reporter Panel -->
+        <div class="tab-panel active" id="bug-reporter-panel">
+          <div class="panels-wrapper">
+            <div class="panel panel-scrollable">
+              <h2 class="section-title">Bug Report Form</h2>
+              <form class="bug-report-form">
+                <div class="form-group">
+                  <label class="input-label">Component *</label>
+                  <select class="select-input" id="component" required>
+                    <option value="" disabled>Select Component...</option>
+                    <option value="1624352" selected>
+                      ChromeOS > Aluminium > 1p & 3p Apps > 1P Apps
+                    </option>
+                    <option value="1624252">
+                      ChromeOS > Aluminium > 1p & 3p Apps > 3P Apps
+                    </option>
+                    <option value="168499">ChromeOS > App Compatibility</option>
+                    <option value="602018">
+                      ChromeOS > Chrome OS App Compatibility > Web/PWA
+                      Compatibility
+                    </option>
+                    <option value="170544">
+                      ChromeOS > Chrome OS App Compatibility > 3rd Party
+                      Developer #unreleased(Post triage)
+                    </option>
+                  </select>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field-third">
+                    <label class="input-label">Issue Type *</label>
+                    <select class="select-input" id="bugType" required>
+                      <option value="BUG">Bug</option>
+                      <option value="FEATURE_REQUEST">Feature Request</option>
+                      <option value="PROCESS">Process</option>
+                      <option value="TASK">Task</option>
+                    </select>
+                  </div>
+
+                  <div class="form-field-third">
+                    <label class="input-label">Device Type *</label>
+                    <select class="select-input" id="deviceType" required>
+                      <option value="AL">AL (Aluminium)</option>
+                      <option value="ChromeOS">ChromeOS (Generic)</option>
+                      <option value="Android">Android</option>
+                    </select>
+                  </div>
+
+                  <div class="form-field-third">
+                    <label class="input-label">Application Type *</label>
+                    <select class="select-input" id="applicationType" required>
+                      <option value="" disabled selected>
+                        Select Application Type...
+                      </option>
+                      <option value="Web(Clank)">Web(Clank)</option>
+                      <option value="Application">Application</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field-half">
+                    <label class="input-label">Device Mode *</label>
+                    <select class="select-input" id="deviceMode" required>
+                      <option value="clamshell">Clamshell</option>
+                      <option value="tablet">Touchview/Tablet</option>
+                      <option value="clamshellAndTablet">
+                        Clamshell & Tablet
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="form-field-half">
+                    <label class="input-label">Priority *</label>
+                    <select class="select-input" id="priority" required>
+                      <option value="P0">P0 - Critical</option>
+                      <option value="P1">P1 - High</option>
+                      <option value="P2" selected>P2 - Medium</option>
+                      <option value="P3">P3 - Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field-half">
+                    <label class="input-label">Blocking Bugs (Optional)</label>
+                    <input
+                      type="text"
+                      class="text-input"
+                      id="masterBugs"
+                      placeholder="Enter bug IDs separated by commas"
+                    />
+                  </div>
+
+                  <div class="form-field-half">
+                    <div class="file-upload">
+                      <input type="file" id="gifUploadInput" accept=".gif" />
+                      <label for="gifUploadInput" class="upload-label">
+                        <i class="material-icons">attach_file</i>
+                        <span id="buttonLabelText">Attach GIF (Opt.)</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="input-label">Hotlists</label>
+                  <div class="input-with-icon">
+                    <input
+                      type="text"
+                      class="text-input"
+                      id="hotlistsVisibleInput"
+                      placeholder="Type or click to add hotlists"
+                    />
+                    <button type="button" class="input-icon">
+                      <i class="material-icons">add</i>
+                    </button>
+                  </div>
+                  <input
+                    type="hidden"
+                    id="hotlistsHiddenInput"
+                    name="hotlistIds"
+                  />
+                </div>
+
+                <div class="hotlists-container">
+                  <div class="chips-container" id="selectedHotlists">
+                    <!-- Example selected hotlists -->
+                    <div class="chip chip-selected">
+                      arc++
+                      <span class="chip-delete">&times;</span>
+                    </div>
+                    <div class="chip chip-selected">
+                      Appcompat-AL-1Papps
+                      <span class="chip-delete">&times;</span>
+                    </div>
+                  </div>
+
+                  <label class="input-label">Suggested Hotlists</label>
+                  <div class="chips-container" id="hotlistSuggestions">
+                    <div class="chip chip-suggestion">dps_arc_proactive</div>
+                    <div class="chip chip-suggestion">Appcompat-AL-3Papps</div>
+                    <div class="chip chip-suggestion">Appcompat-Clank-AL</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="input-label">Device Details *</label>
+                  <textarea
+                    class="textarea-input"
+                    id="deviceDetails"
+                    rows="6"
+                    required
+                  >
+- Google Chrome: 120.0.6099.129
+- OS: ChromeOS 118.0.5993.100
+- Customization ID: EXAMPLE123
+- App name: Example App
+- Package Name/URL: com.example.app
+- App Version: 2.1.0
+- App taken from: Play Store
+                  </textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="input-label">Describe the issue *</label>
+                  <textarea
+                    class="textarea-input"
+                    id="command"
+                    rows="3"
+                    required
+                    placeholder="Enter a detailed description of the issue..."
+                  ></textarea>
+                </div>
+
+                <div class="button-group">
+                  <button
+                    type="button"
+                    id="generateBug"
+                    class="btn btn-success"
+                  >
+                    <i class="material-icons">auto_awesome</i> Generate
+                    Description
+                  </button>
+                  <button
+                    type="button"
+                    id="reportBug"
+                    class="btn btn-primary"
+                    disabled
+                  >
+                    <i class="material-icons">bug_report</i> Report Issue
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="panel panel-scrollable">
+              <h2 class="section-title">Generated Description</h2>
+              <div class="output-container" id="outputContainer">
+                <div class="form-group">
+                  <label class="input-label">Generated Title</label>
+                  <input
+                    type="text"
+                    class="text-input"
+                    id="generatedTitleDisplay"
+                    readonly
+                  />
+                </div>
+                <textarea
+                  id="editableBugDescription"
+                  class="output-textarea"
+                  placeholder="AI-generated bug body will appear here..."
+                ></textarea>
+                <div class="loading-overlay" id="outputLoadingOverlay">
+                  <div class="spinner"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bug Verification Panel -->
+        <div class="tab-panel" id="bug-verification-panel">
+          <div class="panels-wrapper">
+            <div class="panel panel-scrollable">
+              <h2 class="section-title">Bug Verification</h2>
+              <div class="form-group">
+                <label class="input-label">Master Bug ID</label>
+                <div class="input-with-icon">
+                  <input
+                    type="text"
+                    class="text-input"
+                    id="masterBugIdInput"
+                    placeholder="Enter master bug ID"
+                  />
+                  <button
+                    type="button"
+                    class="input-icon"
+                    id="fetchChildBugsBtn"
+                  >
+                    <i class="material-icons">search</i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="input-label"
+                  >Google Sheet Link for Test Plan</label
+                >
+                <input
+                  type="url"
+                  class="text-input"
+                  id="googleSheetLinkInput"
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                />
+              </div>
+
+              <hr class="section-divider" />
+
+              <div class="form-group">
+                <label class="input-label">Device Details</label>
+                <textarea
+                  class="textarea-input"
+                  id="bugVerificationDeviceDetails"
+                  rows="6"
+                ></textarea>
+              </div>
+
+              <h3 class="sub-section-title">Child Bugs</h3>
+              <div class="bug-list" id="childBugList">
+                <!-- Example bug items -->
+                <div class="bug-item active" data-bug-id="123456">
+                  <div class="bug-header">
+                    <div>
+                      <div class="bug-title">
+                        App crashes on rotation in tablet mode
+                      </div>
+                      <div class="bug-id">ID: 123456</div>
+                    </div>
+                    <span class="bug-type bug-type-app">App</span>
+                  </div>
+                </div>
+
+                <div class="bug-item" data-bug-id="789012">
+                  <div class="bug-header">
+                    <div>
+                      <div class="bug-title">
+                        Platform API returns incorrect data
+                      </div>
+                      <div class="bug-id">ID: 789012</div>
+                    </div>
+                    <span class="bug-type bug-type-platform">Platform</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="bug-details" id="bugDetailsPanel">
+                <h2 class="section-title" id="selectedChildBugTitle">
+                  App crashes on rotation in tablet mode
+                </h2>
+
+                <hr class="section-divider" />
+
+                <h3 class="sub-section-title">AI Summary</h3>
+                <div class="ai-summary" id="aiSummaryDisplay">
+                  This bug occurs when the app is rotated from portrait to
+                  landscape mode in tablet mode. The crash is reproducible on
+                  Chrome OS version 118.0.5993.100 with Example App version
+                  2.1.0. The crash appears to be caused by improper handling of
+                  configuration changes during rotation. This is likely an app
+                  issue rather than a platform issue.
+                </div>
+
+                <div class="accordion" id="bugContentsAccordion">
+                  <div
+                    class="accordion-header"
+                    onclick="this.parentElement.classList.toggle('open')"
+                  >
+                    <h4 class="accordion-title">Bug Description & Details</h4>
+                    <i class="material-icons accordion-icon">expand_more</i>
+                  </div>
+                  <div class="accordion-content" id="bugContentsAccordionBody">
+                    <p>Steps to reproduce:</p>
+                    <ol>
+                      <li>
+                        Launch Example App on ChromeOS device in tablet mode
+                      </li>
+                      <li>Navigate to settings page</li>
+                      <li>Rotate device from portrait to landscape</li>
+                    </ol>
+                    <p>Expected: App adapts to new orientation</p>
+                    <p>Actual: App crashes with NPE in ActivityManager</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="input-label"
+                    >User Comments / Additional Data</label
+                  >
+                  <textarea
+                    class="textarea-input"
+                    id="additionalVerificationData"
+                    rows="4"
+                    placeholder="Add your verification notes here..."
+                  ></textarea>
+                </div>
+
+                <div class="button-group" id="verificationSection">
+                  <button
+                    type="button"
+                    id="reproducibleBtn"
+                    class="btn btn-success"
+                  >
+                    <i class="material-icons">check_circle</i> Reproducible
+                  </button>
+                  <button
+                    type="button"
+                    id="notReproducibleBtn"
+                    class="btn btn-error"
+                  >
+                    <i class="material-icons">cancel</i> Not Reproducible
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate 1 Pager Panel -->
+        <div class="tab-panel" id="one-pager-panel">
+          <div class="panel">
+            <h2 class="section-title">Generate One-Pager Document</h2>
+
+            <div class="form-row">
+              <div class="form-field-half">
+                <label class="input-label">Test Report Google Sheet URL</label>
+                <div class="input-with-icon">
+                  <input
+                    type="url"
+                    class="text-input"
+                    id="testReportGoogleSheetUrl"
+                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                  />
+                  <button
+                    type="button"
+                    class="input-icon"
+                    id="openDrivePickerBtn"
+                  >
+                    <i class="material-icons">folder_open</i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-field-half">
+                <label class="input-label">Target Google Doc URL</label>
+                <input
+                  type="url"
+                  class="text-input"
+                  id="onePagerDocUrlInput"
+                  placeholder="https://docs.google.com/document/d/..."
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field-half">
+                <label class="input-label">App Name</label>
+                <input type="text" class="text-input" id="appNameInput" />
+              </div>
+
+              <div class="form-field-half">
+                <label class="input-label">Package Name/URL</label>
+                <input
+                  type="text"
+                  class="text-input"
+                  id="appPackageNameInput"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field-half">
+                <label class="input-label">App Version</label>
+                <input type="text" class="text-input" id="appVersionInput" />
+              </div>
+
+              <div class="form-field-half">
+                <label class="input-label">Device Name</label>
+                <input type="text" class="text-input" id="deviceNameInput" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="input-label">Device OS Version</label>
+              <input type="text" class="text-input" id="deviceOsVersionInput" />
+            </div>
+
+            <div class="form-group">
+              <label class="input-label">Summary of Testing</label>
+              <textarea
+                class="textarea-input"
+                id="summaryOfTestingInput"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="input-label">Bug IDs</label>
+              <textarea
+                class="textarea-input"
+                id="extractedBugIdsDisplay"
+                rows="2"
+                placeholder="Bug IDs will appear here after extracting from Google Sheet..."
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field-third">
+                <label class="input-label">Priority ChromeOS App Bugs</label>
+                <textarea
+                  class="textarea-input"
+                  id="priorityChromeOsAppBugsInput"
+                  rows="4"
+                ></textarea>
+              </div>
+
+              <div class="form-field-third">
+                <label class="input-label">Pixel Tablet App Bugs</label>
+                <textarea
+                  class="textarea-input"
+                  id="pixelTabletAppBugsInput"
+                  rows="4"
+                ></textarea>
+              </div>
+
+              <div class="form-field-third">
+                <label class="input-label">ChromeOS Feature Requests</label>
+                <textarea
+                  class="textarea-input"
+                  id="chromeOsFeatureRequestsInput"
+                  rows="4"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button
+                type="button"
+                id="triggerOnePagerBtn"
+                class="btn btn-primary"
+              >
+                <i class="material-icons">description</i> Generate One-Pager
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div
+      id="toastNotificationsContainer"
+      class="toast-notifications-container"
+    ></div>
+
+    <script>
+      // Tab navigation
+      document.addEventListener("DOMContentLoaded", function () {
+        const tabs = document.querySelectorAll(".tab");
+        const tabPanels = document.querySelectorAll(".tab-panel");
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            // Remove active class from all tabs and panels
+            tabs.forEach((t) => t.classList.remove("active"));
+            tabPanels.forEach((p) => p.classList.remove("active"));
+
+            // Add active class to clicked tab and corresponding panel
+            tab.classList.add("active");
+            const panelId = tab.getAttribute("data-tab") + "-panel";
+            document.getElementById(panelId).classList.add("active");
+          });
+        });
+
+        // Toggle accordion
+        document.querySelectorAll(".accordion-header").forEach((header) => {
+          header.addEventListener("click", () => {
+            const accordion = header.parentElement;
+            accordion.classList.toggle("open");
+          });
+        });
+
+        // Example of toggling loading overlay
+        const generateBtn = document.getElementById("generateBug");
+        const outputLoadingOverlay = document.getElementById(
+          "outputLoadingOverlay"
+        );
+        const reportBtn = document.getElementById("reportBug");
+
+        if (generateBtn && outputLoadingOverlay && reportBtn) {
+          generateBtn.addEventListener("click", () => {
+            // Show loading overlay
+            outputLoadingOverlay.classList.add("show");
+
+            // Simulate processing time (replace with actual API call)
+            setTimeout(() => {
+              // Hide loading overlay
+              outputLoadingOverlay.classList.remove("show");
+
+              // Update output
+              document.getElementById("generatedTitleDisplay").value =
+                "Example App crashes on rotation in tablet mode";
+              document.getElementById("editableBugDescription").value =
+                "Steps to reproduce:\n1. Launch Example App on ChromeOS device in tablet mode\n2. Navigate to settings page\n3. Rotate device from portrait to landscape\n\nExpected: App adapts to new orientation\nActual: App crashes with NPE in ActivityManager";
+
+              // Enable report button
+              reportBtn.disabled = false;
+
+              // Show toast notification
+              showToast("Bug description generated successfully!", "success");
+            }, 2000);
+          });
+        }
+
+        // Initialize toast notifications
+        window.toastNotificationsContainer = document.getElementById(
+          "toastNotificationsContainer"
+        );
+        window.activeProcessToasts = new Map();
+        window.toastIdCounter = 0;
+
+        // Example toast function
+        window.showToast = function (message, type = "info", duration = 3000) {
+          if (!toastNotificationsContainer) return null;
+
+          const toastId = `toast-${Date.now()}-${toastIdCounter++}`;
+          const toastElement = document.createElement("div");
+          toastElement.className = `toast-notification toast-bg-${type}`;
+          toastElement.setAttribute("data-toast-id", toastId);
+
+          toastElement.innerHTML = `
+            <span class="toast-message-text">${message}</span>
+            <button type="button" class="toast-close-button" aria-label="Close notification">&times;</button>
+          `;
+
+          const closeButton = toastElement.querySelector(".toast-close-button");
+          closeButton.addEventListener("click", () => {
+            toastElement.classList.remove("show");
+            setTimeout(() => {
+              if (toastElement.parentNode) {
+                toastElement.parentNode.removeChild(toastElement);
+              }
+            }, 300);
+          });
+
+          toastNotificationsContainer.appendChild(toastElement);
+
+          // Force reflow to enable transition
+          toastElement.offsetHeight;
+          toastElement.classList.add("show");
+
+          if (duration !== Infinity) {
+            setTimeout(() => {
+              toastElement.classList.remove("show");
+              setTimeout(() => {
+                if (toastElement.parentNode) {
+                  toastElement.parentNode.removeChild(toastElement);
+                }
+              }, 300);
+            }, duration);
+          }
+
+          return toastId;
+        };
+
+        // Demo toast buttons for testing
+        document.getElementById("reportBug")?.addEventListener("click", () => {
+          showToast("Bug reported successfully!", "success");
+        });
+
+        document
+          .getElementById("reproducibleBtn")
+          ?.addEventListener("click", () => {
+            showToast("Marked as reproducible and comment added", "success");
+          });
+
+        document
+          .getElementById("notReproducibleBtn")
+          ?.addEventListener("click", () => {
+            showToast("Marked as not reproducible and comment added", "error");
+          });
+
+        document
+          .getElementById("triggerOnePagerBtn")
+          ?.addEventListener("click", () => {
+            showToast("Generating one-pager...", "info", Infinity);
+
+            // Simulate processing
+            setTimeout(() => {
+              document
+                .querySelector(".toast-notification")
+                ?.classList.remove("show");
+              setTimeout(() => {
+                document.querySelector(".toast-notification")?.remove();
+                showToast("One-pager generated successfully!", "success");
+              }, 300);
+            }, 3000);
+          });
+
+        // Example of chip interaction
+        document.querySelectorAll(".chip-suggestion").forEach((chip) => {
+          chip.addEventListener("click", () => {
+            const chipText = chip.textContent.trim();
+            const selectedHotlists =
+              document.getElementById("selectedHotlists");
+
+            // Create a new selected chip
+            const newChip = document.createElement("div");
+            newChip.className = "chip chip-selected";
+            newChip.innerHTML = `
+              ${chipText}
+              <span class="chip-delete">&times;</span>
+            `;
+
+            // Add click event to delete button
+            newChip
+              .querySelector(".chip-delete")
+              .addEventListener("click", (e) => {
+                e.stopPropagation();
+                newChip.remove();
+                showToast(
+                  `Removed "${chipText}" from selected hotlists`,
+                  "info"
+                );
+              });
+
+            selectedHotlists.appendChild(newChip);
+            showToast(`Added "${chipText}" to selected hotlists`, "success");
+          });
+        });
+
+        // Bug item selection
+        document.querySelectorAll(".bug-item").forEach((item) => {
+          item.addEventListener("click", () => {
+            document
+              .querySelectorAll(".bug-item")
+              .forEach((i) => i.classList.remove("active"));
+            item.classList.add("active");
+
+            // Update details panel (in a real implementation, this would fetch data)
+            const bugId = item.getAttribute("data-bug-id");
+            const bugTitle = item.querySelector(".bug-title").textContent;
+
+            document.getElementById("selectedChildBugTitle").textContent =
+              bugTitle;
+            showToast(`Selected bug #${bugId}`, "info");
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

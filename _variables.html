@@ -1,47 +1,149 @@
 <style>
-    /* --- COLOR & THEME VARS (Dark Mode Only) --- */
-    :root {
-      --primary-color: #536dfe;
-      --accent-color: #11a4b3;
-      --secondary-color: #03dac6; /* From _mdl_customizations.html dark-mode */
-      --background-color: #121212; /* From _mdl_customizations.html dark-mode */
-      --surface-color: #1e1e1e; /* From _mdl_customizations.html dark-mode */
-      --background-panel: rgba(30, 30, 30, 0.3); /* From _dark_mode.html */
-      --text-color: #e0e0e0; /* From _dark_mode.html */
-      --text-secondary-color: #aaaaaa; /* From _dark_mode.html */
-      --input-bg-color: rgba(44, 44, 44, 0.4); /* From _dark_mode.html */
-      --border-color: rgba(66, 66, 66, 0.5); /* From _dark_mode.html */
-      --success-bg: #1a331d; /* From _dark_mode.html */
-      --success-text: #a5d6a7; /* From _dark_mode.html */
-      --success-border: #2e7d32; /* From _dark_mode.html */
-      --success-color: #11a4b3;
-      --error-bg: #3f1a1d; /* From _dark_mode.html */
-      --error-text: #ef9a9a; /* From _dark_mode.html */
-      --error-border: #880e4f; /* From _dark_mode.html */
-      --error-color: #B32811;
-      --icon-color: #aaaaaa; /* From _dark_mode.html */
+  /* --- COLOR & THEME VARS --- */
+  :root {
+    /* Main theme colors */
+    --primary-color: #6366f1;
+    --primary-light: #818cf8;
+    --primary-dark: #4f46e5;
+    --accent-color: #10b981;
+    --accent-light: #34d399;
+    --accent-dark: #059669;
+    --secondary-color: #7c3aed;
+    --secondary-light: #a78bfa;
+    --secondary-dark: #6d28d9;
 
-      /* Button Group Variables */
-      --button-success-bg: var(--success-bg);
-      --button-success-text: var(--success-text);
-      --button-error-bg: var(--error-bg);
-      --button-error-text: var(--error-text);
+    /* Background and surface colors */
+    --background-color: #0f172a;
+    --surface-color: #1e293b;
+    --bg-gradient-1: #0f172a;
+    --bg-gradient-2: #1e293b;
+    --bg-gradient-3: #0f1729;
+    --background-panel: rgba(16, 20, 34, 0.6);
+    --card-bg: rgba(16, 20, 34, 0.6);
 
-      /* "On-Color" variables for text on colored backgrounds (Dark Mode specific) */
-      --on-primary: #000000;
-      --on-secondary: #000000;
-      --on-accent: #000000;
-      --on-background: #ffffff;
-      --on-surface: #ffffff;
+    /* Glassmorphic background properties */
+    --glass-bg: rgba(15, 23, 42, 0.3);
+    --glass-bg-lighter: rgba(30, 41, 59, 0.2);
+    --glass-bg-darker: rgba(15, 23, 42, 0.5);
 
-      /* Helper for RGB values for tint calculations */
-      --primary-color-rgb: 83, 109, 254; /* From _mdl_customizations.html dark-mode */
-      --background-panel-rgb: 30, 30, 30; /* From _dark_mode.html */
+    /* Text colors */
+    --text-color: rgba(255, 255, 255, 0.9);
+    --text-secondary-color: rgba(255, 255, 255, 0.6);
+    --text-disabled: rgba(255, 255, 255, 0.4);
+    --input-bg-color: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.12);
 
-      /* Shadows */
-      --shadow-1: 0 4px 6px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3); /* From _dark_mode.html */
-      --shadow-2: 0 10px 15px rgba(0,0,0,0.5), 0 3px 6px rgba(0,0,0,0.4); /* From _dark_mode.html */
-      --shadow-3: 0 20px 25px rgba(0,0,0,0.2), 0 10px 10px rgba(0,0,0,0.12); /* Original from _variables.html */
-       --select-arrow: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23AAAAAA%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* From _dark_mode.html */
-    }
+    /* Success/Error colors */
+    --success-bg: rgba(16, 185, 129, 0.2);
+    --success-text: #a5d6a7;
+    --success-border: #2e7d32;
+    --success-color: #10b981;
+    --error-bg: rgba(239, 68, 68, 0.2);
+    --error-text: #ef9a9a;
+    --error-border: #880e4f;
+    --error-color: #ef4444;
+    --icon-color: rgba(255, 255, 255, 0.6);
+
+    /* Status colors */
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+
+    /* Glassmorphism variables */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+    --glass-blur: 12px;
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+    --card-radius: 16px;
+    --button-radius: 10px;
+    --form-radius: 8px;
+
+    /* Button styles */
+    --button-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --button-shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.1),
+      0 4px 6px rgba(0, 0, 0, 0.05);
+    --button-glow: 0 0 10px rgba(99, 102, 241, 0.5);
+    --button-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Toast Notification Variables */
+    --toast-bg-info: rgba(59, 130, 246, 0.8);
+    --toast-bg-success: rgba(16, 185, 129, 0.8);
+    --toast-bg-error: rgba(239, 68, 68, 0.8);
+    --toast-bg-warning: rgba(245, 158, 11, 0.8);
+    --toast-text-color: #ffffff;
+    --toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --toast-border-radius: 12px;
+    --toast-z-index: 1000;
+    --toast-font-size: 0.95rem;
+    --toast-line-height: 1.5;
+    --toast-max-width: 350px;
+    --toast-padding: 14px 18px;
+    --toast-transition-duration: 0.3s;
+
+    /* Sizing and spacing */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+
+    /* Button Group Variables */
+    --button-success-bg: var(--success-bg);
+    --button-success-text: var(--success-text);
+    --button-error-bg: var(--error-bg);
+    --button-error-text: var(--error-text);
+
+    /* "On-Color" variables for text on colored backgrounds */
+    --on-primary: #000000;
+    --on-secondary: #000000;
+    --on-accent: #000000;
+    --on-background: #ffffff;
+    --on-surface: #ffffff;
+
+    /* Helper for RGB values for tint calculations */
+    --primary-color-rgb: 99, 102, 241;
+    --background-panel-rgb: 16, 20, 34;
+
+    /* Animation durations */
+    --transition-fast: 0.2s;
+    --transition-normal: 0.3s;
+    --transition-slow: 0.5s;
+
+    /* Shadows */
+    --shadow-1: 0 4px 6px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-2: 0 10px 15px rgba(0, 0, 0, 0.5), 0 3px 6px rgba(0, 0, 0, 0.4);
+    --shadow-3: 0 20px 25px rgba(0, 0, 0, 0.2), 0 10px 10px rgba(0, 0, 0, 0.12);
+
+    /* Neon glow effects */
+    --neon-primary: 0 0 5px rgba(99, 102, 241, 0.5),
+      0 0 20px rgba(99, 102, 241, 0.3);
+    --neon-accent: 0 0 5px rgba(16, 185, 129, 0.5),
+      0 0 20px rgba(16, 185, 129, 0.3);
+    --neon-error: 0 0 5px rgba(239, 68, 68, 0.5),
+      0 0 20px rgba(239, 68, 68, 0.3);
+    --neon-secondary: 0 0 5px rgba(124, 58, 237, 0.5),
+      0 0 20px rgba(124, 58, 237, 0.3);
+
+    /* Text effects */
+    --text-glow: 0 0 10px rgba(255, 255, 255, 0.1);
+    --text-gradient-primary: linear-gradient(
+      135deg,
+      var(--primary-light),
+      var(--primary-dark)
+    );
+    --text-gradient-secondary: linear-gradient(
+      135deg,
+      var(--secondary-light),
+      var(--secondary-dark)
+    );
+    --text-gradient-accent: linear-gradient(
+      135deg,
+      var(--accent-light),
+      var(--accent-dark)
+    );
+
+    --select-arrow: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23AAAAAA%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  }
 </style>

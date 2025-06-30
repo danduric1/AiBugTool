@@ -1,96 +1,276 @@
-  <div class="panels-wrapper">
-    <div class="left-panel mdl-shadow--2dp glass-panel" style="position: relative; display: flex; flex-direction: column; align-items: center;">
-      <div class="button-container" style="width: 100%; display: flex; justify-content: space-between; ">
-        <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 20px;">
-          <a href="https://docs.google.com/document/d/1PH_rsJJbROr0FG-EBorMMS2L9kmDOM6b26O4nx465OQ/edit?resourcekey=0-IfERYw5CG8_mO_Z58plxbg&tab=t.0" target="_blank" id="onePagerTemplateBtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
-            1-Pager Template for Apps
-          </a>
-        </div>
-        <div style="width: 100%; display: flex; justify-content: flex-end; margin-bottom: 20px;">
-          <a href="https://docs.google.com/document/d/121slN-xwEgZw_8GCGA5w10hXsoQzzrMU9UoEgf-5tm8/edit?tab=t.0" target="_blank" id="onePagerTemplateBtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
-            1-Pager Template for Games
-          </a>
-        </div>
+<div class="panels-wrapper">
+  <div
+    class="left-panel panel panel-scrollable"
+    style="
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    "
+  >
+    <div
+      class="button-container"
+      style="width: 100%; display: flex; justify-content: space-between"
+    >
+      <div
+        style="
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 20px;
+        "
+      >
+        <a
+          href="https://docs.google.com/document/d/1PH_rsJJbROr0FG-EBorMMS2L9kmDOM6b26O4nx465OQ/edit?resourcekey=0-IfERYw5CG8_mO_Z58plxbg&tab=t.0"
+          target="_blank"
+          id="onePagerTemplateBtn"
+          class="btn btn-primary"
+        >
+          1-Pager Template for Apps
+        </a>
       </div>
-      <h3 style="margin-top: 0; text-align: center; color: var(--primary-color);">Generate 1-Pager Document</h3>
-      <p style="text-align: center; color: var(--text-secondary-color); margin-bottom: 20px;">Enter bug IDs and the target Google Doc link to generate a categorized 1-pager.</p>
-
-      <div id="target-doc-url-container" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width has-button" style="max-width: 600px; width: 100%;">
-        <input class="mdl-textfield__input" type="url" id="testReportGoogleSheetUrl" name="testReportGoogleSheetUrl" pattern="https:\/\/docs\.google\.com\/spreadsheets\/d\/.+">
-        <label class="mdl-textfield__label" for="testReportGoogleSheetUrl">Test report Google sheet url</label>
-        <span class="mdl-textfield__error">Please enter a valid Google Sheet URL.</span>
-        <button id="openDrivePickerBtn" class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored mdl-js-ripple-effect mdl-textfield__button">
-          <i class="material-icons">folder_open</i>
-        </button>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield full-width" style="max-width: 600px; width: 100%; margin-top: 20px;">
-        <textarea class="mdl-textfield__input" type="text" rows="5" id="extractedBugIdsDisplay"></textarea> <label class="mdl-textfield__label" for="extractedBugIdsDisplay">Retrieved Bug IDs (Editable)</label>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width" style="max-width: 600px; width: 100%;">
-        <input class="mdl-textfield__input" type="text" id="onePagerDocUrlInput">
-        <label class="mdl-textfield__label" for="onePagerDocUrlInput">Google Document Link (Target URL)</label>
-      </div>
-
-      <button id="triggerOnePagerBtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" style="margin-top: 20px; width: 100%; max-width: 300px;">
-        Generate 1-Pager
-      </button>
-
-      <div id="onePagerStatus" class="status-message" style="display: none; margin-top: 20px; width: 100%; max-width: 600px;"></div>
-      <div id="onePagerLoadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="spinner"></div>
+      <div
+        style="
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 20px;
+        "
+      >
+        <a
+          href="https://docs.google.com/document/d/121slN-xwEgZw_8GCGA5w10hXsoQzzrMU9UoEgf-5tm8/edit?tab=t.0"
+          target="_blank"
+          id="onePagerTemplateBtn"
+          class="btn btn-primary"
+        >
+          1-Pager Template for Games
+        </a>
       </div>
     </div>
+    <h3 class="section-title" style="margin-top: 0; text-align: center">
+      Generate 1-Pager Document
+    </h3>
+    <p
+      style="
+        text-align: center;
+        color: var(--text-secondary-color);
+        margin-bottom: 20px;
+      "
+    >
+      Enter bug IDs and the target Google Doc link to generate a categorized
+      1-pager.
+    </p>
 
-    <div class="right-panel mdl-shadow--2dp glass-panel output-container" style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
-      <h3 style="margin-top: 0; text-align: center; color: var(--primary-color);">Extracted Information</h3>
-      <p style="text-align: center; color: var(--text-secondary-color); margin-bottom: 20px;">Review and edit details extracted from the sheet.</p>
+    <div
+      id="target-doc-url-container"
+      class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width has-button"
+      style="max-width: 600px; width: 100%"
+    >
+      <input
+        class="mdl-textfield__input"
+        type="url"
+        id="testReportGoogleSheetUrl"
+        name="testReportGoogleSheetUrl"
+        pattern="https:\/\/docs\.google\.com\/spreadsheets\/d\/.+"
+      />
+      <label class="mdl-textfield__label" for="testReportGoogleSheetUrl"
+        >Test report Google sheet url</label
+      >
+      <span class="mdl-textfield__error"
+        >Please enter a valid Google Sheet URL.</span
+      >
+      <button id="openDrivePickerBtn" class="input-icon">
+        <i class="material-icons">folder_open</i>
+      </button>
+    </div>
 
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <input class="mdl-textfield__input" type="text" id="appNameInput">
-        <label class="mdl-textfield__label" for="appNameInput">App Name</label>
-      </div>
+    <div
+      class="mdl-textfield mdl-js-textfield full-width"
+      style="max-width: 600px; width: 100%; margin-top: 20px"
+    >
+      <textarea
+        class="mdl-textfield__input"
+        type="text"
+        rows="5"
+        id="extractedBugIdsDisplay"
+      ></textarea>
+      <label class="mdl-textfield__label" for="extractedBugIdsDisplay"
+        >Retrieved Bug IDs (Editable)</label
+      >
+    </div>
 
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <input class="mdl-textfield__input" type="text" id="appPackageNameInput">
-        <label class="mdl-textfield__label" for="appPackageNameInput">App Package Name</label>
-      </div>
+    <div
+      class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width"
+      style="max-width: 600px; width: 100%"
+    >
+      <input
+        class="mdl-textfield__input"
+        type="text"
+        id="onePagerDocUrlInput"
+      />
+      <label class="mdl-textfield__label" for="onePagerDocUrlInput"
+        >Google Document Link (Target URL)</label
+      >
+    </div>
 
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <input class="mdl-textfield__input" type="text" id="appVersionInput">
-        <label class="mdl-textfield__label" for="appVersionInput">App Version</label>
-      </div>
+    <button
+      id="triggerOnePagerBtn"
+      class="btn btn-primary"
+      style="margin-top: 20px; width: 100%; max-width: 300px"
+    >
+      Generate 1-Pager
+    </button>
 
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <input class="mdl-textfield__input" type="text" id="deviceNameInput">
-        <label class="mdl-textfield__label" for="deviceNameInput">Device Name</label>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <input class="mdl-textfield__input" type="text" id="deviceOsVersionInput">
-        <label class="mdl-textfield__label" for="deviceOsVersionInput">Device OS Version</label>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <textarea class="mdl-textfield__input" type="text" rows="5" id="summaryOfTestingInput"></textarea>
-        <label class="mdl-textfield__label" for="summaryOfTestingInput">Summary of Testing</label>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <textarea class="mdl-textfield__input" type="text" rows="5" id="priorityChromeOsAppBugsInput"></textarea>
-        <label class="mdl-textfield__label" for="priorityChromeOsAppBugsInput">Priority ChromeOS App Bugs</label>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <textarea class="mdl-textfield__input" type="text" rows="5" id="pixelTabletAppBugsInput"></textarea>
-        <label class="mdl-textfield__label" for="pixelTabletAppBugsInput">Pixel Tablet App Bugs</label>
-      </div>
-
-      <div class="mdl-textfield mdl-js-textfield full-width" style="max-width: 600px; width: 100%; margin-bottom: 10px;">
-        <textarea class="mdl-textfield__input" type="text" rows="5" id="chromeOsFeatureRequestsInput"></textarea>
-        <label class="mdl-textfield__label" for="chromeOsFeatureRequestsInput">ChromeOS Feature Requests</label>
-      </div>
-
+    <div
+      id="onePagerStatus"
+      class="status-message"
+      style="display: none; margin-top: 20px; width: 100%; max-width: 600px"
+    ></div>
+    <div
+      id="onePagerLoadingOverlay"
+      class="loading-overlay"
+      style="display: none"
+    >
+      <div class="spinner"></div>
     </div>
   </div>
+
+  <div
+    class="right-panel panel panel-scrollable output-container"
+    style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    "
+  >
+    <h3 class="section-title" style="margin-top: 0; text-align: center">
+      Extracted Information
+    </h3>
+    <p
+      style="
+        text-align: center;
+        color: var(--text-secondary-color);
+        margin-bottom: 20px;
+      "
+    >
+      Review and edit details extracted from the sheet.
+    </p>
+
+    <div
+      class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <input class="mdl-textfield__input" type="text" id="appNameInput" />
+      <label class="mdl-textfield__label" for="appNameInput">App Name</label>
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <input
+        class="mdl-textfield__input"
+        type="text"
+        id="appPackageNameInput"
+      />
+      <label class="mdl-textfield__label" for="appPackageNameInput"
+        >App Package Name</label
+      >
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <input class="mdl-textfield__input" type="text" id="appVersionInput" />
+      <label class="mdl-textfield__label" for="appVersionInput"
+        >App Version</label
+      >
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <input class="mdl-textfield__input" type="text" id="deviceNameInput" />
+      <label class="mdl-textfield__label" for="deviceNameInput"
+        >Device Name</label
+      >
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <input
+        class="mdl-textfield__input"
+        type="text"
+        id="deviceOsVersionInput"
+      />
+      <label class="mdl-textfield__label" for="deviceOsVersionInput"
+        >Device OS Version</label
+      >
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <textarea
+        class="mdl-textfield__input"
+        type="text"
+        rows="5"
+        id="summaryOfTestingInput"
+      ></textarea>
+      <label class="mdl-textfield__label" for="summaryOfTestingInput"
+        >Summary of Testing</label
+      >
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <textarea
+        class="mdl-textfield__input"
+        type="text"
+        rows="5"
+        id="priorityChromeOsAppBugsInput"
+      ></textarea>
+      <label class="mdl-textfield__label" for="priorityChromeOsAppBugsInput"
+        >Priority ChromeOS App Bugs</label
+      >
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <textarea
+        class="mdl-textfield__input"
+        type="text"
+        rows="5"
+        id="pixelTabletAppBugsInput"
+      ></textarea>
+      <label class="mdl-textfield__label" for="pixelTabletAppBugsInput"
+        >Pixel Tablet App Bugs</label
+      >
+    </div>
+
+    <div
+      class="mdl-textfield mdl-js-textfield full-width"
+      style="max-width: 600px; width: 100%; margin-bottom: 10px"
+    >
+      <textarea
+        class="mdl-textfield__input"
+        type="text"
+        rows="5"
+        id="chromeOsFeatureRequestsInput"
+      ></textarea>
+      <label class="mdl-textfield__label" for="chromeOsFeatureRequestsInput"
+        >ChromeOS Feature Requests</label
+      >
+    </div>
+  </div>
+</div>

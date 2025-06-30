@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <title>AI Bug Tool - Toast Notification Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <!-- Include the Toast Notification Service -->
+    <script src="ToastNotificationService.js"></script>
+
+    <style>
+      :root {
+        /* Main theme colors */
+        --primary-color: #6366f1;
+        --primary-light: #818cf8;
+        --primary-dark: #4f46e5;
+        --accent-color: #10b981;
+        --accent-light: #34d399;
+        --accent-dark: #059669;
+
+        /* Background and surface colors */
+        --bg-gradient-1: #0f172a;
+        --bg-gradient-2: #1e293b;
+        --bg-gradient-3: #0f1729;
+        --surface-color: rgba(255, 255, 255, 0.1);
+        --card-bg: rgba(16, 20, 34, 0.6);
+
+        /* Text colors */
+        --text-primary: rgba(255, 255, 255, 0.9);
+        --text-secondary: rgba(255, 255, 255, 0.6);
+        --text-disabled: rgba(255, 255, 255, 0.4);
+
+        /* Glassmorphism variables */
+        --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+        --glass-blur: 12px;
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+        --card-radius: 16px;
+        --btn-radius: 10px;
+        --form-radius: 8px;
+
+        /* Status colors */
+        --success-color: #10b981;
+        --error-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+
+        /* Toast Notification Variables */
+        --toast-bg-info: rgba(59, 130, 246, 0.8);
+        --toast-bg-success: rgba(16, 185, 129, 0.8);
+        --toast-bg-error: rgba(239, 68, 68, 0.8);
+        --toast-bg-warning: rgba(245, 158, 11, 0.8);
+        --toast-text-color: #ffffff;
+        --toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --toast-border-radius: 12px;
+        --toast-z-index: 1000;
+        --toast-font-size: 0.95rem;
+        --toast-line-height: 1.5;
+        --toast-max-width: 350px;
+        --toast-padding: 14px 18px;
+        --toast-transition-duration: 0.3s;
+
+        /* Sizing and spacing */
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 20px;
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 16px;
+        --spacing-lg: 24px;
+        --spacing-xl: 32px;
+        --spacing-xxl: 48px;
+
+        /* Animation durations */
+        --transition-fast: 0.2s;
+        --transition-normal: 0.3s;
+        --transition-slow: 0.5s;
+
+        /* Neon glow effects */
+        --neon-primary: 0 0 5px rgba(99, 102, 241, 0.5),
+          0 0 20px rgba(99, 102, 241, 0.3);
+        --neon-accent: 0 0 5px rgba(16, 185, 129, 0.5),
+          0 0 20px rgba(16, 185, 129, 0.3);
+        --neon-error: 0 0 5px rgba(239, 68, 68, 0.5),
+          0 0 20px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Global reset and base styles */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(
+          135deg,
+          var(--bg-gradient-1),
+          var(--bg-gradient-2),
+          var(--bg-gradient-3)
+        );
+        background-attachment: fixed;
+        color: var(--text-primary);
+        min-height: 100vh;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Layout styles */
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .main-header {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border-bottom: var(--glass-border);
+        padding: var(--spacing-md) var(--spacing-xl);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(
+          90deg,
+          var(--primary-light),
+          var(--accent-light)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: var(--neon-primary);
+        letter-spacing: 0.5px;
+      }
+
+      .header-title i {
+        margin-right: var(--spacing-sm);
+        font-size: 1.8rem;
+        color: var(--primary-light);
+        text-shadow: var(--neon-primary);
+        -webkit-text-fill-color: var(--primary-light);
+      }
+
+      /* Main content area */
+      .main-content {
+        flex: 1;
+        padding: var(--spacing-xl);
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* Panel layout */
+      .panel {
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        box-shadow: var(--glass-shadow);
+        border: var(--glass-border);
+        padding: var(--spacing-lg);
+        overflow: hidden;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        margin-bottom: var(--spacing-xl);
+      }
+
+      /* Section titles */
+      .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+        background: linear-gradient(
+          90deg,
+          var(--primary-light),
+          var(--accent-light)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0.5px;
+      }
+
+      .demo-description {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+        line-height: 1.6;
+      }
+
+      /* Button styles */
+      .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: var(--btn-radius);
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-normal) ease;
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.5px;
+      }
+
+      .btn i {
+        margin-right: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        box-shadow: var(--neon-primary);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+      }
+
+      .btn-success {
+        background: linear-gradient(
+          135deg,
+          var(--accent-color),
+          var(--accent-dark)
+        );
+        color: white;
+        box-shadow: var(--neon-accent);
+      }
+
+      .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+      }
+
+      .btn-error {
+        background: linear-gradient(135deg, var(--error-color), #dc2626);
+        color: white;
+        box-shadow: var(--neon-error);
+      }
+
+      .btn-error:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+      }
+
+      .btn-warning {
+        background: linear-gradient(135deg, var(--warning-color), #d97706);
+        color: white;
+        box-shadow: 0 0 5px rgba(245, 158, 11, 0.5),
+          0 0 20px rgba(245, 158, 11, 0.3);
+      }
+
+      .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+      }
+
+      .btn-info {
+        background: linear-gradient(135deg, var(--info-color), #1d4ed8);
+        color: white;
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.5),
+          0 0 20px rgba(59, 130, 246, 0.3);
+      }
+
+      .btn-info:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      /* Button shine effect */
+      .btn:after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        transform: rotate(45deg);
+        transition: all 0.5s ease;
+        opacity: 0;
+      }
+
+      .btn:hover:after {
+        animation: shine 1.5s ease;
+      }
+
+      @keyframes shine {
+        0% {
+          opacity: 0;
+          transform: rotate(45deg) translate(-100%, -100%);
+        }
+        50% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 0;
+          transform: rotate(45deg) translate(100%, 100%);
+        }
+      }
+
+      /* Code block styling */
+      .code-block {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--border-radius-md);
+        padding: var(--spacing-md);
+        font-family: "Consolas", "Monaco", monospace;
+        font-size: 0.9rem;
+        color: #e2e8f0;
+        line-height: 1.5;
+        overflow-x: auto;
+        margin-bottom: var(--spacing-lg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .code-comment {
+        color: #94a3b8;
+      }
+
+      .code-string {
+        color: #a5d6ff;
+      }
+
+      .code-keyword {
+        color: #c678dd;
+      }
+
+      .code-function {
+        color: #61afef;
+      }
+
+      .code-property {
+        color: #e06c75;
+      }
+
+      /* Toast notification container */
+      .toast-notifications-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: var(--toast-z-index);
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 10px;
+        align-items: flex-end;
+        pointer-events: none;
+        max-height: 80vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .toast-notifications-container::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* Individual toast notification */
+      .toast-notification {
+        background-color: var(--toast-bg-info);
+        color: var(--toast-text-color);
+        padding: var(--toast-padding);
+        border-radius: var(--toast-border-radius);
+        box-shadow: var(--toast-shadow);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 250px;
+        max-width: var(--toast-max-width);
+        word-break: break-word;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity var(--toast-transition-duration) ease-out,
+          transform var(--toast-transition-duration) ease-out;
+        pointer-events: all;
+        font-size: var(--toast-font-size);
+        line-height: var(--toast-line-height);
+        margin-left: auto;
+        position: relative;
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: var(--glass-border);
+      }
+
+      /* Toast appearance animation */
+      .toast-notification.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      /* Toast spinner for "working" states */
+      .toast-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Message text container */
+      .toast-message-text {
+        flex-grow: 1;
+        padding-right: 8px;
+        display: flex;
+        align-items: center;
+      }
+
+      /* Close button */
+      .toast-close-button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        margin-left: 8px;
+        transition: all var(--transition-normal) ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        width: 28px;
+        border-radius: 50%;
+      }
+
+      .toast-close-button:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Toast background colors */
+      .toast-bg-info {
+        background-color: var(--toast-bg-info);
+      }
+
+      .toast-bg-success {
+        background-color: var(--toast-bg-success);
+      }
+
+      .toast-bg-error {
+        background-color: var(--toast-bg-error);
+      }
+
+      .toast-bg-warning {
+        background-color: var(--toast-bg-warning);
+      }
+
+      /* Toast with actions */
+      .toast-notification.has-action {
+        padding-bottom: 8px;
+      }
+
+      /* Container for action buttons */
+      .toast-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+        gap: 8px;
+      }
+
+      /* Action button styling */
+      .toast-action-button {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color var(--transition-normal) ease;
+        letter-spacing: 0.5px;
+      }
+
+      .toast-action-button:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .main-content {
+          padding: var(--spacing-md);
+        }
+
+        .button-group {
+          flex-direction: column;
+        }
+
+        .button-group .btn {
+          width: 100%;
+        }
+
+        .section-title {
+          font-size: 1.2rem;
+        }
+      }
+
+      .section-divider {
+        margin: var(--spacing-lg) 0;
+        border: none;
+        border-top: var(--glass-border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="main-header">
+        <h1 class="header-title">
+          <i class="material-icons">notifications</i>
+          Toast Notification Demo
+        </h1>
+      </header>
+
+      <main class="main-content">
+        <div class="panel">
+          <h2 class="section-title">Toast Notification Service Demo</h2>
+          <p class="demo-description">
+            This page demonstrates the functionality of the Toast Notification
+            Service for the AI Bug Tool. The service provides a modern,
+            customizable way to display toast notifications with different
+            styles, durations, and interactive elements.
+          </p>
+
+          <h3 class="section-title">Basic Toast Types</h3>
+          <div class="button-group">
+            <button type="button" class="btn btn-info" id="showInfoToast">
+              <i class="material-icons">info</i> Info Toast
+            </button>
+            <button type="button" class="btn btn-success" id="showSuccessToast">
+              <i class="material-icons">check_circle</i> Success Toast
+            </button>
+            <button type="button" class="btn btn-warning" id="showWarningToast">
+              <i class="material-icons">warning</i> Warning Toast
+            </button>
+            <button type="button" class="btn btn-error" id="showErrorToast">
+              <i class="material-icons">error</i> Error Toast
+            </button>
+          </div>
+
+          <h3 class="section-title">Working States</h3>
+          <div class="button-group">
+            <button type="button" class="btn btn-primary" id="showWorkingToast">
+              <i class="material-icons">autorenew</i> Working Toast
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              id="completeWorkingToast"
+              disabled
+            >
+              <i class="material-icons">check_circle</i> Complete Working
+            </button>
+            <button
+              type="button"
+              class="btn btn-error"
+              id="failWorkingToast"
+              disabled
+            >
+              <i class="material-icons">cancel</i> Fail Working
+            </button>
+          </div>
+
+          <h3 class="section-title">Interactive Toasts</h3>
+          <div class="button-group">
+            <button
+              type="button"
+              class="btn btn-warning"
+              id="showConfirmationToast"
+            >
+              <i class="material-icons">help</i> Confirmation Toast
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="showMultiActionToast"
+            >
+              <i class="material-icons">more_horiz</i> Multi-Action Toast
+            </button>
+          </div>
+
+          <hr class="section-divider" />
+
+          <h3 class="section-title">Usage Example</h3>
+          <div class="code-block">
+            <div class="code-comment">// Basic toast types</div>
+            toastService.<span class="code-function">info</span>(<span
+              class="code-string"
+              >'This is an info message'</span
+            >);<br />
+            toastService.<span class="code-function">success</span>(<span
+              class="code-string"
+              >'Operation successful!'</span
+            >);<br />
+            toastService.<span class="code-function">warning</span>(<span
+              class="code-string"
+              >'Warning: This action cannot be undone'</span
+            >);<br />
+            toastService.<span class="code-function">error</span>(<span
+              class="code-string"
+              >'Something went wrong'</span
+            >);<br />
+            <br />
+            <div class="code-comment">// Working toast example</div>
+            <span class="code-keyword">const</span> workingToastId =
+            toastService.<span class="code-function">working</span>(<span
+              class="code-string"
+              >'Processing your request...'</span
+            >);<br />
+            <br />
+            <div class="code-comment">
+              // Later, when the operation completes:
+            </div>
+            toastService.<span class="code-function">completeWorking</span
+            >(workingToastId,
+            <span class="code-string">'Request completed successfully!'</span
+            >);<br />
+            <br />
+            <div class="code-comment">// Or if it fails:</div>
+            toastService.<span class="code-function">failWorking</span
+            >(workingToastId,
+            <span class="code-string">'Failed to process request'</span>);<br />
+            <br />
+            <div class="code-comment">// Toast with actions</div>
+            toastService.<span class="code-function">warning</span>(<span
+              class="code-string"
+              >'Delete this item?'</span
+            >, Infinity, [<br />
+            &nbsp;&nbsp;{ <span class="code-property">text</span>:
+            <span class="code-string">'Cancel'</span>,
+            <span class="code-property">callback</span>: () => console.log(<span
+              class="code-string"
+              >'Cancelled'</span
+            >) },<br />
+            &nbsp;&nbsp;{ <span class="code-property">text</span>:
+            <span class="code-string">'Delete'</span>,
+            <span class="code-property">callback</span>: () => console.log(<span
+              class="code-string"
+              >'Deleted'</span
+            >) }<br />
+            ]);
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div
+      id="toastNotificationsContainer"
+      class="toast-notifications-container"
+    ></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Store reference to the working toast ID
+        let currentWorkingToastId = null;
+
+        // Show info toast
+        document
+          .getElementById("showInfoToast")
+          .addEventListener("click", function () {
+            toastService.info("This is an informational message");
+          });
+
+        // Show success toast
+        document
+          .getElementById("showSuccessToast")
+          .addEventListener("click", function () {
+            toastService.success("Operation completed successfully!");
+          });
+
+        // Show warning toast
+        document
+          .getElementById("showWarningToast")
+          .addEventListener("click", function () {
+            toastService.warning(
+              "Warning: This action might have consequences"
+            );
+          });
+
+        // Show error toast
+        document
+          .getElementById("showErrorToast")
+          .addEventListener("click", function () {
+            toastService.error("Error: Something went wrong");
+          });
+
+        // Show working toast
+        document
+          .getElementById("showWorkingToast")
+          .addEventListener("click", function () {
+            // Clear any existing working toast
+            if (currentWorkingToastId) {
+              toastService.dismiss(currentWorkingToastId);
+            }
+
+            // Create new working toast
+            currentWorkingToastId = toastService.working(
+              "Processing your request..."
+            );
+
+            // Enable complete/fail buttons
+            document.getElementById("completeWorkingToast").disabled = false;
+            document.getElementById("failWorkingToast").disabled = false;
+          });
+
+        // Complete working toast
+        document
+          .getElementById("completeWorkingToast")
+          .addEventListener("click", function () {
+            if (currentWorkingToastId) {
+              toastService.completeWorking(
+                currentWorkingToastId,
+                "Request processed successfully!"
+              );
+              currentWorkingToastId = null;
+
+              // Disable buttons
+              this.disabled = true;
+              document.getElementById("failWorkingToast").disabled = true;
+            } else {
+              toastService.info(
+                "No working toast to complete. Try creating one first."
+              );
+            }
+          });
+
+        // Fail working toast
+        document
+          .getElementById("failWorkingToast")
+          .addEventListener("click", function () {
+            if (currentWorkingToastId) {
+              toastService.failWorking(
+                currentWorkingToastId,
+                "Failed to process request. Please try again."
+              );
+              currentWorkingToastId = null;
+
+              // Disable buttons
+              this.disabled = true;
+              document.getElementById("completeWorkingToast").disabled = true;
+            } else {
+              toastService.info(
+                "No working toast to fail. Try creating one first."
+              );
+            }
+          });
+
+        // Show confirmation toast
+        document
+          .getElementById("showConfirmationToast")
+          .addEventListener("click", function () {
+            toastService.warning("Delete this item?", Infinity, [
+              {
+                text: "Cancel",
+                callback: function () {
+                  toastService.info("Action cancelled");
+                },
+              },
+              {
+                text: "Delete",
+                callback: function () {
+                  toastService.success("Item deleted successfully");
+                },
+              },
+            ]);
+          });
+
+        // Show multi-action toast
+        document
+          .getElementById("showMultiActionToast")
+          .addEventListener("click", function () {
+            toastService.info("Choose an option:", Infinity, [
+              {
+                text: "Option 1",
+                callback: function () {
+                  toastService.success("Option 1 selected");
+                },
+              },
+              {
+                text: "Option 2",
+                callback: function () {
+                  toastService.success("Option 2 selected");
+                },
+              },
+              {
+                text: "Option 3",
+                callback: function () {
+                  toastService.success("Option 3 selected");
+                },
+              },
+            ]);
+          });
+      });
+    </script>
+  </body>
+</html>
